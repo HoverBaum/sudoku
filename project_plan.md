@@ -73,7 +73,7 @@ type UserProgress = {
 - [x] As a user, I want to click a button to generate a random puzzle.
 - [x] As a dev, I want `generatePuzzle(seed, difficulty)` to produce a valid, reproducible puzzle.
 - [ ] As a dev, I want cage generation to result in a logically solvable puzzle without guessing.
-- [ ] As a dev, I want to visually debug generated puzzles (optional dev tool).
+- [x] As a dev, I want to visually debug generated puzzles (implemented via PuzzleDebugger).
 
 ### Puzzle Solving
 - [x] As a user, I want to click cells and type numbers (1–9).
@@ -116,12 +116,12 @@ type UserProgress = {
 ## 🧱 Architecture
 
 ### Core Functions
-- [ ] `generatePuzzle(seed: string, difficulty: Difficulty): SumSudokuPuzzle`
-- [ ] `validateGrid(grid: UserGrid, puzzle: SumSudokuPuzzle): boolean`
-- [ ] `saveProgress(progress: UserProgress): void`
-- [ ] `loadProgress(seed: string, difficulty: Difficulty): UserProgress | null`
-- [ ] `encodeGrid(grid: UserGrid): string`
-- [ ] `decodeGrid(str: string): UserGrid`
+- [x] `generatePuzzle(seed: string, difficulty: Difficulty): SumSudokuPuzzle`
+- [x] `validateGrid(grid: UserGrid, puzzle: SumSudokuPuzzle): boolean`
+- [x] `saveProgress(progress: UserProgress): void`
+- [x] `loadProgress(seed: string, difficulty: Difficulty): UserProgress | null`
+- [x] `encodeGrid(grid: UserGrid): string`
+- [x] `decodeGrid(str: string): UserGrid`
 
 ---
 
@@ -158,22 +158,23 @@ type UserProgress = {
 ## 🧪 Testing Stories
 
 ### Unit Tests
-- [ ] Test `generatePuzzle()` for deterministic output.
-- [ ] Test cage creation logic.
-- [ ] Test `validateGrid()` with correct and incorrect boards.
-- [ ] Test `encodeGrid()` and `decodeGrid()` roundtrip.
+- [x] Test `generatePuzzle()` for deterministic output
+- [x] Test cage creation logic (basic coverage)
+- [x] Test `validateGrid()` with correct and incorrect boards
+- [x] Test `encodeGrid()` and `decodeGrid()` roundtrip
+- [ ] Test advanced cage properties (logical solvability)
 
 ### UI Tests
-- [ ] Render puzzle from seed+difficulty
-- [ ] Input numbers, notes, erase
-- [ ] Switch to and from note mode
-- [ ] Share link copies full state
-- [ ] Open puzzle from shared URL
-- [ ] LocalStorage saves/restores progress
+- [x] Render puzzle from seed+difficulty
+- [x] Input numbers, notes, erase
+- [x] Switch to and from note mode
+- [ ] Test share link copying and URL state
+- [ ] Test LocalStorage persistence
+- [ ] Test URL parameter handling
 
 ### Accessibility
-- [ ] Ensure all interactive elements are keyboard-accessible.
-- [ ] Use proper labels and aria attributes for form controls.
+- [x] Ensure all interactive elements are keyboard-accessible
+- [x] Use proper labels and aria attributes for form controls
 
 ---
 
