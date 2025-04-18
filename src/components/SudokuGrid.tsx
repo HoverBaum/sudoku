@@ -2,6 +2,8 @@ import { useState, useCallback, KeyboardEvent } from 'react'
 import { Card } from '@/components/ui/card'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
+import { getCageColor } from '@/lib/color-utils'
+import { useTheme } from '@/components/theme-provider'
 import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
 
 type SudokuGridProps = {
@@ -17,11 +19,15 @@ export function SudokuGrid({
 }: SudokuGridProps) {
   const [isNoteMode, setIsNoteMode] = useState(false)
   const [selectedCell, setSelectedCell] = useState<CellCoord | null>(null)
+  const { theme } = useTheme()
+  const isDarkMode =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
 
-  // Create a color map for cages with lighter colors than debug mode
+  // Create a color map for cages
   const cageColors = puzzle.cages.reduce((acc, cage, index) => {
-    const hue = (index * 137.508) % 360 // Golden angle to distribute colors
-    acc[cage.id!] = `hsl(${hue}, 70%, 95%)` // Increased lightness for subtler colors
+    acc[cage.id!] = getCageColor(index, isDarkMode)
     return acc
   }, {} as Record<string, string>)
 

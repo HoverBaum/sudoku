@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/sonner'
 import { PuzzleDebugger } from '@/components/PuzzleDebugger'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ModeToggle } from '@/components/mode-toggle'
 import type {
   CellCoord,
   Difficulty,
@@ -21,7 +23,7 @@ import {
   decodeGrid,
 } from '@/lib/storage-utils'
 
-export default function App() {
+function AppContent() {
   const [puzzle, setPuzzle] = useState<SumSudokuPuzzle | null>(null)
   const [progress, setProgress] = useState<UserProgress | null>(null)
   const [isDebugMode, setIsDebugMode] = useState(false)
@@ -144,6 +146,9 @@ export default function App() {
   if (!puzzle || !progress) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="absolute top-4 right-4">
+          <ModeToggle />
+        </div>
         <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
       </div>
     )
@@ -164,6 +169,7 @@ export default function App() {
         >
           {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
         </Button>
+        <ModeToggle />
       </div>
 
       {isDebugMode && puzzle && <PuzzleDebugger puzzle={puzzle} />}
@@ -176,5 +182,13 @@ export default function App() {
 
       <Toaster />
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="sum-sudoku-theme">
+      <AppContent />
+    </ThemeProvider>
   )
 }
