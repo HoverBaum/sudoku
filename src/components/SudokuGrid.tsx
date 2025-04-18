@@ -18,6 +18,13 @@ export function SudokuGrid({
   const [isNoteMode, setIsNoteMode] = useState(false)
   const [selectedCell, setSelectedCell] = useState<CellCoord | null>(null)
 
+  // Create a color map for cages with lighter colors than debug mode
+  const cageColors = puzzle.cages.reduce((acc, cage, index) => {
+    const hue = (index * 137.508) % 360 // Golden angle to distribute colors
+    acc[cage.id!] = `hsl(${hue}, 70%, 95%)` // Increased lightness for subtler colors
+    return acc
+  }, {} as Record<string, string>)
+
   const handleCellClick = useCallback((coord: CellCoord) => {
     setSelectedCell(coord)
   }, [])
@@ -150,6 +157,11 @@ export function SudokuGrid({
                         borders.left && 'border-l-2',
                         isSelected && 'bg-primary/20'
                       )}
+                      style={{
+                        backgroundColor: cage
+                          ? cageColors[cage.id!]
+                          : undefined,
+                      }}
                       role="gridcell"
                       aria-label={`Cell ${row + 1},${col + 1}`}
                       aria-selected={isSelected}
@@ -174,7 +186,7 @@ export function SudokuGrid({
                         >
                           {cell.value}
                         </span>
-                      ) : cell.notes && cell.notes.length > 0 ? (
+                      ) : (cell.notes || []).length > 0 ? (
                         <div
                           className="grid grid-cols-3 gap-0 p-1 text-xs text-muted-foreground"
                           role="list"
@@ -186,7 +198,7 @@ export function SudokuGrid({
                               className="w-3 h-3 flex items-center justify-center"
                               role="listitem"
                             >
-                              {cell.notes.includes(n) ? n : ''}
+                              {(cell.notes || []).includes(n) ? n : ''}
                             </div>
                           ))}
                         </div>
