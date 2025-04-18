@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useTheme } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
+import { getCageColor } from '@/lib/color-utils'
 import type { SumSudokuPuzzle } from '@/types/game'
 
 type PuzzleDebuggerProps = {
@@ -12,11 +14,15 @@ export function PuzzleDebugger({ puzzle }: PuzzleDebuggerProps) {
   const [selectedTab, setSelectedTab] = useState<'solution' | 'cages'>(
     'solution'
   )
+  const { theme } = useTheme()
+  const isDarkMode =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)
 
-  // Create a color map for cages
+  // Create a color map for cages using the same color utility as the main grid
   const cageColors = puzzle.cages.reduce((acc, cage, index) => {
-    const hue = (index * 137.508) % 360 // Golden angle to distribute colors
-    acc[cage.id!] = `hsl(${hue}, 70%, 85%)`
+    acc[cage.id!] = getCageColor(index, isDarkMode)
     return acc
   }, {} as Record<string, string>)
 
@@ -72,16 +78,14 @@ export function PuzzleDebugger({ puzzle }: PuzzleDebuggerProps) {
             {puzzle.cages.map((cage) => (
               <div
                 key={cage.id}
-                className="flex items-center gap-4"
+                className="flex items-center gap-4 p-2 rounded"
                 style={{ backgroundColor: cageColors[cage.id!] }}
               >
-                <div className="p-2 rounded">
-                  <span className="font-medium">Sum: {cage.sum}</span>
-                  <span className="ml-4">
-                    Cells:{' '}
-                    {cage.cells.map((c) => `(${c.row},${c.col})`).join(', ')}
-                  </span>
-                </div>
+                <span className="font-medium">Sum: {cage.sum}</span>
+                <span>
+                  Cells:{' '}
+                  {cage.cells.map((c) => `(${c.row},${c.col})`).join(', ')}
+                </span>
               </div>
             ))}
           </div>
