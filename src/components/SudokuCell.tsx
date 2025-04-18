@@ -40,7 +40,7 @@ export function SudokuCell({
         borders.right && 'border-r-2',
         borders.bottom && 'border-b-2',
         borders.left && 'border-l-2',
-        isSelected && 'bg-primary/20'
+        isSelected && 'border-primary'
       )}
       style={{
         backgroundColor: cageColor,
