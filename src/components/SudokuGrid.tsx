@@ -134,14 +134,24 @@ export function SudokuGrid({
       aria-label="Sudoku Grid"
     >
       <div
-        className="grid grid-cols-9 gap-0 bg-muted p-1 rounded-lg"
+        className="grid grid-cols-9 gap-2 bg-muted rounded-lg relative"
         role="row"
         aria-label="Grid cells"
       >
+        <div className="absolute inset-0 grid grid-cols-3 pointer-events-none">
+          <div className="border-r-2 border-primary/50"></div>
+          <div className="border-r-2 border-primary/50"></div>
+          <div></div>
+        </div>
+        <div className="absolute inset-0 grid grid-rows-3 pointer-events-none">
+          <div className="border-b-2 border-primary/50"></div>
+          <div className="border-b-2 border-primary/50"></div>
+          <div></div>
+        </div>
         {Array(9)
           .fill(null)
           .map((_, row) => (
-            <div key={row} role="row">
+            <div key={row} role="row" className="contents">
               {Array(9)
                 .fill(null)
                 .map((_, col) => {
