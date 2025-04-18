@@ -113,50 +113,61 @@ export function SudokuGrid({
       aria-label="Sudoku Grid"
     >
       <div
-        className="grid grid-cols-9 gap-1.5 bg-muted rounded-lg relative p-4"
+        className="grid grid-cols-3 gap-2 bg-muted rounded-lg p-4"
         role="row"
         aria-label="Grid cells"
       >
-        <div className="absolute inset-4 grid grid-cols-3 pointer-events-none">
-          <div className="border-r-[3px] border-primary/80 mx-2"></div>
-          <div className="border-r-[3px] border-primary/80 mx-2"></div>
-          <div></div>
-        </div>
-        <div className="absolute inset-4 grid grid-rows-3 pointer-events-none">
-          <div className="border-b-[3px] border-primary/80 my-2"></div>
-          <div className="border-b-[3px] border-primary/80 my-2"></div>
-          <div></div>
-        </div>
-        {Array(9)
+        {Array(3)
           .fill(null)
-          .map((_, row) => (
-            <div key={row} role="row" className="contents">
-              {Array(9)
+          .map((_, gridRow) => (
+            <div key={`row-${gridRow}`} className="contents">
+              {Array(3)
                 .fill(null)
-                .map((_, col) => {
-                  const cell = userGrid[row][col]
-                  const cage = getCage(row, col)
-                  const borders = getCageBorders(row, col)
-                  const isSelected =
-                    selectedCell?.row === row && selectedCell?.col === col
+                .map((_, gridCol) => (
+                  <div
+                    key={`grid-${gridRow}-${gridCol}`}
+                    className="grid grid-cols-3 gap-1 p-1 bg-background/50 rounded"
+                  >
+                    {Array(3)
+                      .fill(null)
+                      .map((_, cellRow) => (
+                        <div key={`subrow-${cellRow}`} className="contents">
+                          {Array(3)
+                            .fill(null)
+                            .map((_, cellCol) => {
+                              const row = gridRow * 3 + cellRow
+                              const col = gridCol * 3 + cellCol
+                              const cell = userGrid[row][col]
+                              const cage = getCage(row, col)
+                              const borders = getCageBorders(row, col)
+                              const isSelected =
+                                selectedCell?.row === row &&
+                                selectedCell?.col === col
 
-                  return (
-                    <SudokuCell
-                      key={`${row}-${col}`}
-                      cell={cell}
-                      coord={{ row, col }}
-                      cage={cage}
-                      isSelected={isSelected}
-                      cageColor={cage ? cageColors[cage.id!] : undefined}
-                      borders={borders}
-                      showCageSum={
-                        cage?.cells[0].row === row && cage?.cells[0].col === col
-                      }
-                      onClick={handleCellClick}
-                      onKeyDown={handleKeyDown}
-                    />
-                  )
-                })}
+                              return (
+                                <SudokuCell
+                                  key={`${row}-${col}`}
+                                  cell={cell}
+                                  coord={{ row, col }}
+                                  cage={cage}
+                                  isSelected={isSelected}
+                                  cageColor={
+                                    cage ? cageColors[cage.id!] : undefined
+                                  }
+                                  borders={borders}
+                                  showCageSum={
+                                    cage?.cells[0].row === row &&
+                                    cage?.cells[0].col === col
+                                  }
+                                  onClick={handleCellClick}
+                                  onKeyDown={handleKeyDown}
+                                />
+                              )
+                            })}
+                        </div>
+                      ))}
+                  </div>
+                ))}
             </div>
           ))}
       </div>
