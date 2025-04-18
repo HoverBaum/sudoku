@@ -134,18 +134,18 @@ export function SudokuGrid({
       aria-label="Sudoku Grid"
     >
       <div
-        className="grid grid-cols-9 gap-2 bg-muted rounded-lg relative"
+        className="grid grid-cols-9 gap-1.5 bg-muted rounded-lg relative p-4"
         role="row"
         aria-label="Grid cells"
       >
-        <div className="absolute inset-0 grid grid-cols-3 pointer-events-none">
-          <div className="border-r-2 border-primary/50"></div>
-          <div className="border-r-2 border-primary/50"></div>
+        <div className="absolute inset-4 grid grid-cols-3 pointer-events-none">
+          <div className="border-r-[3px] border-primary/80 mx-2"></div>
+          <div className="border-r-[3px] border-primary/80 mx-2"></div>
           <div></div>
         </div>
-        <div className="absolute inset-0 grid grid-rows-3 pointer-events-none">
-          <div className="border-b-2 border-primary/50"></div>
-          <div className="border-b-2 border-primary/50"></div>
+        <div className="absolute inset-4 grid grid-rows-3 pointer-events-none">
+          <div className="border-b-[3px] border-primary/80 my-2"></div>
+          <div className="border-b-[3px] border-primary/80 my-2"></div>
           <div></div>
         </div>
         {Array(9)
@@ -188,7 +188,7 @@ export function SudokuGrid({
                       {cage?.cells[0].row === row &&
                         cage?.cells[0].col === col && (
                           <span
-                            className="absolute top-0 left-0 text-xs text-muted-foreground"
+                            className="absolute top-0.5 left-1 text-sm text-muted-foreground"
                             aria-label={`Cage sum ${cage.sum}`}
                           >
                             {cage.sum}
@@ -197,14 +197,14 @@ export function SudokuGrid({
 
                       {cell.value ? (
                         <span
-                          className="text-2xl font-medium"
+                          className="text-3xl font-medium"
                           aria-label={`Value ${cell.value}`}
                         >
                           {cell.value}
                         </span>
                       ) : (cell.notes || []).length > 0 ? (
                         <div
-                          className="grid grid-cols-3 gap-0 p-1 text-xs text-muted-foreground"
+                          className="grid grid-cols-3 gap-0.5 p-1.5 text-sm text-muted-foreground"
                           role="list"
                           aria-label="Notes"
                         >
