@@ -35,7 +35,7 @@ export function SudokuCell({
     <Card
       className={cn(
         'w-12 h-12 flex items-center justify-center relative',
-        'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+        'focus:outline-none focus:ring-2 focus:ring-ring',
         'cursor-pointer select-none transition-colors duration-200',
         {
           'border-t-2': borders.top,
@@ -67,9 +67,7 @@ export function SudokuCell({
       {cell.value ? (
         <span
           className={cn('text-3xl transition-colors duration-200', {
-            'text-primary': !cell.isPreFilled,
-            'font-bold text-primary-foreground underline decoration-2 underline-offset-4':
-              cell.isPreFilled, // Bold + underline for pre-filled numbers
+            'underline underline-offset-4': cell.isPreFilled, // Bold + underline for pre-filled numbers
           })}
           aria-label={`Value ${cell.value}${
             cell.isPreFilled ? ' (pre-filled)' : ''

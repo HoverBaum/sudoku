@@ -126,7 +126,7 @@ export function SudokuGrid({
                 .map((_, gridCol) => (
                   <div
                     key={`grid-${gridRow}-${gridCol}`}
-                    className="grid grid-cols-3 gap-1 p-1 bg-background/50 rounded"
+                    className="grid grid-cols-3 gap-2 p-1"
                   >
                     {Array(3)
                       .fill(null)
