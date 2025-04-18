@@ -1,9 +1,9 @@
-import { useState, useCallback, KeyboardEvent } from 'react'
-import { Card } from '@/components/ui/card'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { cn } from '@/lib/utils'
-import { getCageColor } from '@/lib/color-utils'
+import { useCallback, KeyboardEvent } from 'react'
 import { useTheme } from '@/components/theme-provider'
+import { getCageColor } from '@/lib/color-utils'
+import { useSudokuControls } from '@/hooks/use-sudoku-controls'
+import { SudokuCell } from './SudokuCell'
+import { NumberControls } from './NumberControls'
 import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
 
 type SudokuGridProps = {
@@ -17,13 +17,20 @@ export function SudokuGrid({
   userGrid,
   onCellUpdate,
 }: SudokuGridProps) {
-  const [isNoteMode, setIsNoteMode] = useState(false)
-  const [selectedCell, setSelectedCell] = useState<CellCoord | null>(null)
   const { theme } = useTheme()
   const isDarkMode =
     theme === 'dark' ||
     (theme === 'system' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+  const {
+    isNoteMode,
+    setIsNoteMode,
+    selectedCell,
+    setSelectedCell,
+    handleCellClick,
+    handleNumberInput,
+  } = useSudokuControls(userGrid, onCellUpdate)
 
   // Create a color map for cages
   const cageColors = puzzle.cages.reduce((acc, cage, index) => {
@@ -31,32 +38,28 @@ export function SudokuGrid({
     return acc
   }, {} as Record<string, string>)
 
-  const handleCellClick = useCallback((coord: CellCoord) => {
-    setSelectedCell(coord)
-  }, [])
+  const getCage = useCallback(
+    (row: number, col: number) => {
+      return puzzle.cages.find((cage) =>
+        cage.cells.some((cell) => cell.row === row && cell.col === col)
+      )
+    },
+    [puzzle.cages]
+  )
 
-  const handleNumberInput = useCallback(
-    (num: number) => {
-      if (!selectedCell) return
+  const getCageBorders = useCallback(
+    (row: number, col: number) => {
+      const cage = getCage(row, col)
+      if (!cage) return { top: true, right: true, bottom: true, left: true }
 
-      if (isNoteMode) {
-        const currentNotes =
-          userGrid[selectedCell.row][selectedCell.col].notes || []
-        const newNotes = currentNotes.includes(num)
-          ? currentNotes.filter((n) => n !== num)
-          : [...currentNotes, num].sort()
-        onCellUpdate(selectedCell, undefined, newNotes)
-      } else {
-        onCellUpdate(
-          selectedCell,
-          userGrid[selectedCell.row][selectedCell.col].value === num
-            ? undefined
-            : num,
-          []
-        )
+      return {
+        top: !cage.cells.some((c) => c.row === row - 1 && c.col === col),
+        right: !cage.cells.some((c) => c.row === row && c.col === col + 1),
+        bottom: !cage.cells.some((c) => c.row === row + 1 && c.col === col),
+        left: !cage.cells.some((c) => c.row === row && c.col === col - 1),
       }
     },
-    [selectedCell, isNoteMode, userGrid, onCellUpdate]
+    [getCage]
   )
 
   const handleKeyDown = useCallback(
@@ -100,31 +103,7 @@ export function SudokuGrid({
         setSelectedCell({ row: newRow, col: newCol })
       }
     },
-    [selectedCell, handleCellClick, handleNumberInput]
-  )
-
-  const getCage = useCallback(
-    (row: number, col: number) => {
-      return puzzle.cages.find((cage) =>
-        cage.cells.some((cell) => cell.row === row && cell.col === col)
-      )
-    },
-    [puzzle.cages]
-  )
-
-  const getCageBorders = useCallback(
-    (row: number, col: number) => {
-      const cage = getCage(row, col)
-      if (!cage) return { top: true, right: true, bottom: true, left: true }
-
-      return {
-        top: !cage.cells.some((c) => c.row === row - 1 && c.col === col),
-        right: !cage.cells.some((c) => c.row === row && c.col === col + 1),
-        bottom: !cage.cells.some((c) => c.row === row + 1 && c.col === col),
-        left: !cage.cells.some((c) => c.row === row && c.col === col - 1),
-      }
-    },
-    [getCage]
+    [selectedCell, handleCellClick, handleNumberInput, setSelectedCell]
   )
 
   return (
@@ -162,111 +141,31 @@ export function SudokuGrid({
                     selectedCell?.row === row && selectedCell?.col === col
 
                   return (
-                    <Card
+                    <SudokuCell
                       key={`${row}-${col}`}
-                      className={cn(
-                        'w-12 h-12 flex items-center justify-center relative cursor-pointer select-none',
-                        'transition-all duration-200',
-                        borders.top && 'border-t-2',
-                        borders.right && 'border-r-2',
-                        borders.bottom && 'border-b-2',
-                        borders.left && 'border-l-2',
-                        isSelected && 'bg-primary/20'
-                      )}
-                      style={{
-                        backgroundColor: cage
-                          ? cageColors[cage.id!]
-                          : undefined,
-                      }}
-                      role="gridcell"
-                      aria-label={`Cell ${row + 1},${col + 1}`}
-                      aria-selected={isSelected}
-                      tabIndex={0}
-                      onClick={() => handleCellClick({ row, col })}
-                      onKeyDown={(e) => handleKeyDown(e, { row, col })}
-                    >
-                      {cage?.cells[0].row === row &&
-                        cage?.cells[0].col === col && (
-                          <span
-                            className="absolute top-0.5 left-1 text-sm text-muted-foreground"
-                            aria-label={`Cage sum ${cage.sum}`}
-                          >
-                            {cage.sum}
-                          </span>
-                        )}
-
-                      {cell.value ? (
-                        <span
-                          className="text-3xl font-medium"
-                          aria-label={`Value ${cell.value}`}
-                        >
-                          {cell.value}
-                        </span>
-                      ) : (cell.notes || []).length > 0 ? (
-                        <div
-                          className="grid grid-cols-3 gap-0.5 p-1.5 text-sm text-muted-foreground"
-                          role="list"
-                          aria-label="Notes"
-                        >
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                            <div
-                              key={n}
-                              className="w-3 h-3 flex items-center justify-center"
-                              role="listitem"
-                            >
-                              {(cell.notes || []).includes(n) ? n : ''}
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-                    </Card>
+                      cell={cell}
+                      coord={{ row, col }}
+                      cage={cage}
+                      isSelected={isSelected}
+                      cageColor={cage ? cageColors[cage.id!] : undefined}
+                      borders={borders}
+                      showCageSum={
+                        cage?.cells[0].row === row && cage?.cells[0].col === col
+                      }
+                      onClick={handleCellClick}
+                      onKeyDown={handleKeyDown}
+                    />
                   )
                 })}
             </div>
           ))}
       </div>
 
-      <div className="flex flex-col gap-2" role="group" aria-label="Controls">
-        <ToggleGroup
-          type="single"
-          value={isNoteMode ? 'notes' : 'normal'}
-          onValueChange={(val) => setIsNoteMode(val === 'notes')}
-          className="mb-2"
-          aria-label="Input mode"
-        >
-          <ToggleGroupItem value="normal" aria-label="Normal mode">
-            Normal
-          </ToggleGroupItem>
-          <ToggleGroupItem value="notes" aria-label="Notes mode">
-            Notes
-          </ToggleGroupItem>
-        </ToggleGroup>
-
-        <div
-          className="grid grid-cols-9 gap-1"
-          role="toolbar"
-          aria-label="Number input"
-        >
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-            <Card
-              key={num}
-              className="w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors"
-              role="button"
-              tabIndex={0}
-              aria-label={`Input number ${num}`}
-              onClick={() => handleNumberInput(num)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleNumberInput(num)
-                }
-              }}
-            >
-              {num}
-            </Card>
-          ))}
-        </div>
-      </div>
+      <NumberControls
+        isNoteMode={isNoteMode}
+        onNoteModeChange={setIsNoteMode}
+        onNumberInput={handleNumberInput}
+      />
     </div>
   )
 }
