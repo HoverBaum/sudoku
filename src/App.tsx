@@ -27,7 +27,6 @@ function AppContent() {
   const [puzzle, setPuzzle] = useState<SumSudokuPuzzle | null>(null)
   const [progress, setProgress] = useState<UserProgress | null>(null)
   const [isDebugMode, setIsDebugMode] = useState(false)
-  const [showSolution, setShowSolution] = useState(false)
   const { toast } = useToast()
 
   // Load puzzle from URL parameters on initial load
@@ -54,7 +53,7 @@ function AppContent() {
       if (savedProgress) {
         setProgress(savedProgress)
       } else {
-        setProgress(createNewProgress(seed, difficulty))
+        setProgress(createNewProgress(seed, difficulty, newPuzzle))
       }
     }
   }, [])
@@ -75,7 +74,7 @@ function AppContent() {
             'Your previous progress on this puzzle has been restored.',
         })
       } else {
-        setProgress(createNewProgress(seed, difficulty))
+        setProgress(createNewProgress(seed, difficulty, newPuzzle))
       }
 
       // Update URL
@@ -91,6 +90,12 @@ function AppContent() {
   const handleCellUpdate = useCallback(
     (coord: CellCoord, value?: number, notes?: number[]) => {
       if (!progress || !puzzle) return
+
+      // Get current cell
+      const currentCell = progress.grid[coord.row][coord.col]
+
+      // Prevent modifying pre-filled cells
+      if (currentCell.isPreFilled) return
 
       const newProgress: UserProgress = {
         ...progress,

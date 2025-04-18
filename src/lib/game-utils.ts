@@ -187,7 +187,35 @@ function generateCages(
   return cages
 }
 
-// Generate a puzzle from a seed and difficulty
+// Generate pre-filled cells for the puzzle based on difficulty
+function generatePreFilledCells(
+  solution: number[][],
+  random: () => number,
+  difficulty: Difficulty
+): { row: number; col: number; value: number }[] {
+  const cells: { row: number; col: number; value: number }[] = []
+  // Number of cells to reveal based on difficulty
+  const numCells =
+    difficulty === 'easy' ? 35 : difficulty === 'medium' ? 25 : 15
+
+  // Create a list of all possible cells
+  const allCells = []
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      allCells.push({ row, col, value: solution[row][col] })
+    }
+  }
+
+  // Randomly select cells to reveal
+  while (cells.length < numCells && allCells.length > 0) {
+    const idx = Math.floor(random() * allCells.length)
+    cells.push(allCells[idx])
+    allCells.splice(idx, 1)
+  }
+
+  return cells
+}
+
 export function generatePuzzle(
   seed: string,
   difficulty: Difficulty
@@ -200,16 +228,20 @@ export function generatePuzzle(
   // Then create cages around it
   const cages = generateCages(solution, random, difficulty)
 
+  // Generate pre-filled cells
+  const preFilledCells = generatePreFilledCells(solution, random, difficulty)
+
   return {
     seed,
     difficulty,
     cages,
-    solution, // Include solution for validation
+    solution,
+    preFilledCells, // Add pre-filled cells to the puzzle
   }
 }
 
-// Validate if numbers in a 3x3 box are valid (no duplicates)
-function validateBox(
+// Internal helper to validate if numbers in a 3x3 box are valid (no duplicates)
+function _validateBox(
   grid: UserGrid,
   startRow: number,
   startCol: number
@@ -227,8 +259,8 @@ function validateBox(
   return true
 }
 
-// Validate if a cage's sum is correct
-function validateCage(grid: UserGrid, cage: Cage): boolean {
+// Internal helper to validate if a cage's sum is correct
+function _validateCage(grid: UserGrid, cage: Cage): boolean {
   let sum = 0
   const seen = new Set<number>()
 

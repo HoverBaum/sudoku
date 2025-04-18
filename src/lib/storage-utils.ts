@@ -1,4 +1,4 @@
-import type { UserProgress, Difficulty } from '@/types/game'
+import type { Difficulty, UserProgress } from '@/types/game'
 import { createEmptyGrid } from './game-utils'
 
 const STORAGE_PREFIX = 'sumSudoku:progress:'
@@ -40,12 +40,28 @@ export function decodeGrid(encoded: string): UserProgress | null {
 
 export function createNewProgress(
   seed: string,
-  difficulty: Difficulty
+  difficulty: Difficulty,
+  initialPuzzle?: {
+    preFilledCells: { row: number; col: number; value: number }[]
+  }
 ): UserProgress {
+  const grid = createEmptyGrid()
+
+  // Initialize pre-filled cells if provided
+  if (initialPuzzle?.preFilledCells) {
+    for (const cell of initialPuzzle.preFilledCells) {
+      grid[cell.row][cell.col] = {
+        value: cell.value,
+        notes: [],
+        isPreFilled: true,
+      }
+    }
+  }
+
   return {
     puzzleSeed: seed,
     difficulty,
-    grid: createEmptyGrid(),
+    grid,
     lastUpdated: Date.now(),
   }
 }

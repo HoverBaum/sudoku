@@ -34,23 +34,26 @@ export function SudokuCell({
   return (
     <Card
       className={cn(
-        'w-12 h-12 flex items-center justify-center relative cursor-pointer select-none',
-        'transition-all duration-200',
-        borders.top && 'border-t-2',
-        borders.right && 'border-r-2',
-        borders.bottom && 'border-b-2',
-        borders.left && 'border-l-2',
-        isSelected && 'border-primary'
+        'w-12 h-12 flex items-center justify-center relative',
+        'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+        'cursor-pointer select-none transition-colors duration-200',
+        {
+          'border-t-2': borders.top,
+          'border-r-2': borders.right,
+          'border-b-2': borders.bottom,
+          'border-l-2': borders.left,
+          'bg-accent': isSelected,
+        }
       )}
-      style={{
-        backgroundColor: cageColor,
-      }}
+      style={{ backgroundColor: cageColor }}
       role="gridcell"
-      aria-label={`Cell ${coord.row + 1},${coord.col + 1}`}
+      aria-label={`Cell ${coord.row + 1},${coord.col + 1}${
+        cell.isPreFilled ? ' (pre-filled)' : ''
+      }`}
       aria-selected={isSelected}
       tabIndex={0}
-      onClick={() => onClick(coord)}
-      onKeyDown={(e) => onKeyDown(e, coord)}
+      onClick={() => !cell.isPreFilled && onClick(coord)}
+      onKeyDown={(e) => !cell.isPreFilled && onKeyDown(e, coord)}
     >
       {showCageSum && cage && (
         <span
@@ -63,8 +66,14 @@ export function SudokuCell({
 
       {cell.value ? (
         <span
-          className="text-3xl font-medium"
-          aria-label={`Value ${cell.value}`}
+          className={cn('text-3xl transition-colors duration-200', {
+            'text-primary': !cell.isPreFilled,
+            'font-bold text-primary-foreground underline decoration-2 underline-offset-4':
+              cell.isPreFilled, // Bold + underline for pre-filled numbers
+          })}
+          aria-label={`Value ${cell.value}${
+            cell.isPreFilled ? ' (pre-filled)' : ''
+          }`}
         >
           {cell.value}
         </span>
@@ -77,10 +86,12 @@ export function SudokuCell({
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
             <div
               key={n}
-              className="w-3 h-3 flex items-center justify-center"
               role="listitem"
+              className={cn('flex items-center justify-center', {
+                invisible: !(cell.notes || []).includes(n),
+              })}
             >
-              {(cell.notes || []).includes(n) ? n : ''}
+              {n}
             </div>
           ))}
         </div>
