@@ -11,15 +11,13 @@ type CellPosition = {
 type CageBoundary = {
   id: string
   paths: string[]
-  color: string
 }
 
 const BOUNDARY_GAP = 1 // Gap between cells to avoid visual overlapping
 
 export const useCageBoundaries = (
   puzzle: SumSudokuPuzzle,
-  cellPositions: Map<string, CellPosition>,
-  colors: Record<string, string>
+  cellPositions: Map<string, CellPosition>
 ): CageBoundary[] => {
   return useMemo(() => {
     return puzzle.cages.map((cage) => {
@@ -78,8 +76,7 @@ export const useCageBoundaries = (
       return {
         id: cage.id!,
         paths,
-        color: colors[cage.id!] || '#000000',
       }
     })
-  }, [puzzle.cages, cellPositions, colors])
+  }, [puzzle.cages, cellPositions])
 }

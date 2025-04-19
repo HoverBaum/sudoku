@@ -34,14 +34,8 @@ export function SudokuGrid({
     handleNumberInput,
   } = useSudokuControls(userGrid, onCellUpdate)
 
-  // Create a color map for cages
-  const cageColors = puzzle.cages.reduce((acc, cage, index) => {
-    acc[cage.id!] = getCageColor(index, isDarkMode)
-    return acc
-  }, {} as Record<string, string>)
-
   const { positions, registerCell } = useCellPositions()
-  const cageBoundaries = useCageBoundaries(puzzle, positions, cageColors)
+  const cageBoundaries = useCageBoundaries(puzzle, positions)
 
   const getCage = useCallback(
     (row: number, col: number) => {
@@ -116,7 +110,7 @@ export function SudokuGrid({
                   <path
                     key={index}
                     d={path}
-                    stroke={boundary.color}
+                    className="stroke-foreground"
                     strokeWidth={2}
                     fill="none"
                   />
