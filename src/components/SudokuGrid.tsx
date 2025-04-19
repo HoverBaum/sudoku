@@ -110,8 +110,7 @@ export function SudokuGrid({
                   <path
                     key={index}
                     d={path}
-                    className="stroke-foreground"
-                    strokeWidth={2}
+                    className="stroke-foreground stroke-2 [stroke-dasharray:5,2]"
                     fill="none"
                   />
                 ))}
