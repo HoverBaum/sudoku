@@ -106,14 +106,14 @@ export function SudokuGrid({
           >
             {cageBoundaries.map((boundary) => (
               <g key={boundary.id}>
-                {boundary.paths.map((path, index) => (
-                  <path
-                    key={index}
-                    d={path}
-                    className="stroke-foreground stroke-2 [stroke-dasharray:5,2]"
-                    fill="none"
-                  />
-                ))}
+                <path
+                  d={boundary.paths.join(' ')}
+                  className="stroke-foreground stroke-2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="4 3"
+                  fill="none"
+                />
               </g>
             ))}
           </svg>
