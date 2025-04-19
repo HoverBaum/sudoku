@@ -160,30 +160,32 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center gap-8 p-8 bg-background">
-      <div className="flex items-center gap-4">
-        <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
-        <Button variant="outline" onClick={handleShare}>
-          Share Puzzle
-        </Button>
-        <Button onClick={handleCheck}>Check Solution</Button>
-        <Button
-          variant="ghost"
-          onClick={() => setIsDebugMode(!isDebugMode)}
-          className="ml-4"
-        >
-          {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
-        </Button>
-        <ModeToggle />
+    <div className="min-h-screen flex flex-col items-center bg-background px-4">
+      <div className="w-full max-w-3xl flex items-center justify-between gap-4 py-4">
+        <div className="flex items-center gap-2">
+          <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
+          <Button variant="outline" onClick={handleShare}>
+            Share Puzzle
+          </Button>
+          <Button onClick={handleCheck}>Check Solution</Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={() => setIsDebugMode(!isDebugMode)}>
+            {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
+          </Button>
+          <ModeToggle />
+        </div>
       </div>
 
-      {isDebugMode && puzzle && <PuzzleDebugger puzzle={puzzle} />}
+      {isDebugMode && <PuzzleDebugger puzzle={puzzle} />}
 
-      <SudokuGrid
-        puzzle={puzzle}
-        userGrid={progress.grid}
-        onCellUpdate={handleCellUpdate}
-      />
+      <div className="flex-1 flex flex-col items-center justify-center -mt-8">
+        <SudokuGrid
+          puzzle={puzzle}
+          userGrid={progress.grid}
+          onCellUpdate={handleCellUpdate}
+        />
+      </div>
 
       <Toaster />
     </div>

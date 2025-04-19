@@ -2,6 +2,8 @@ import { useCallback, KeyboardEvent } from 'react'
 import { useTheme } from '@/components/theme-provider'
 import { getCageColor } from '@/lib/color-utils'
 import { useSudokuControls } from '@/hooks/use-sudoku-controls'
+import { useCageBoundaries } from '@/hooks/use-cage-boundaries'
+import { useCellPositions } from '@/hooks/use-cell-positions'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
 import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
@@ -38,6 +40,9 @@ export function SudokuGrid({
     return acc
   }, {} as Record<string, string>)
 
+  const { positions, registerCell } = useCellPositions()
+  const cageBoundaries = useCageBoundaries(puzzle, positions, cageColors)
+
   const getCage = useCallback(
     (row: number, col: number) => {
       return puzzle.cages.find((cage) =>
@@ -45,21 +50,6 @@ export function SudokuGrid({
       )
     },
     [puzzle.cages]
-  )
-
-  const getCageBorders = useCallback(
-    (row: number, col: number) => {
-      const cage = getCage(row, col)
-      if (!cage) return { top: true, right: true, bottom: true, left: true }
-
-      return {
-        top: !cage.cells.some((c) => c.row === row - 1 && c.col === col),
-        right: !cage.cells.some((c) => c.row === row && c.col === col + 1),
-        bottom: !cage.cells.some((c) => c.row === row + 1 && c.col === col),
-        left: !cage.cells.some((c) => c.row === row && c.col === col - 1),
-      }
-    },
-    [getCage]
   )
 
   const handleKeyDown = useCallback(
@@ -107,69 +97,97 @@ export function SudokuGrid({
   )
 
   return (
-    <div
-      className="flex flex-col items-center gap-4"
-      role="grid"
-      aria-label="Sudoku Grid"
-    >
-      <div
-        className="grid grid-cols-3 gap-2 bg-muted rounded-lg p-4"
-        role="row"
-        aria-label="Grid cells"
-      >
-        {Array(3)
-          .fill(null)
-          .map((_, gridRow) => (
-            <div key={`row-${gridRow}`} className="contents">
-              {Array(3)
-                .fill(null)
-                .map((_, gridCol) => (
-                  <div
-                    key={`grid-${gridRow}-${gridCol}`}
-                    className="grid grid-cols-3 gap-2 p-1"
-                  >
-                    {Array(3)
-                      .fill(null)
-                      .map((_, cellRow) => (
-                        <div key={`subrow-${cellRow}`} className="contents">
-                          {Array(3)
-                            .fill(null)
-                            .map((_, cellCol) => {
-                              const row = gridRow * 3 + cellRow
-                              const col = gridCol * 3 + cellCol
-                              const cell = userGrid[row][col]
-                              const cage = getCage(row, col)
-                              const borders = getCageBorders(row, col)
-                              const isSelected =
-                                selectedCell?.row === row &&
-                                selectedCell?.col === col
-
-                              return (
-                                <SudokuCell
-                                  key={`${row}-${col}`}
-                                  cell={cell}
-                                  coord={{ row, col }}
-                                  cage={cage}
-                                  isSelected={isSelected}
-                                  cageColor={
-                                    cage ? cageColors[cage.id!] : undefined
-                                  }
-                                  borders={borders}
-                                  showCageSum={
-                                    cage?.cells[0].row === row &&
-                                    cage?.cells[0].col === col
-                                  }
-                                  onClick={handleCellClick}
-                                  onKeyDown={handleKeyDown}
-                                />
-                              )
-                            })}
-                        </div>
-                      ))}
-                  </div>
+    <div className="flex flex-col gap-4">
+      <div className="relative w-fit">
+        <div
+          className="relative grid grid-cols-3 gap-2 bg-muted rounded-lg p-4"
+          role="row"
+          aria-label="Grid cells"
+        >
+          <svg
+            className="absolute inset-0 pointer-events-none z-10"
+            style={{ overflow: 'visible' }}
+            width="100%"
+            height="100%"
+          >
+            {cageBoundaries.map((boundary) => (
+              <g key={boundary.id}>
+                {boundary.paths.map((path, index) => (
+                  <path
+                    key={index}
+                    d={path}
+                    stroke={boundary.color}
+                    strokeWidth={2}
+                    fill="none"
+                  />
                 ))}
-            </div>
-          ))}
+              </g>
+            ))}
+          </svg>
+          {Array(3)
+            .fill(null)
+            .map((_, gridRow) => (
+              <div key={`row-${gridRow}`} className="contents">
+                {Array(3)
+                  .fill(null)
+                  .map((_, gridCol) => (
+                    <div
+                      key={`grid-${gridRow}-${gridCol}`}
+                      className="grid grid-cols-3 gap-2 p-1"
+                    >
+                      {Array(3)
+                        .fill(null)
+                        .map((_, cellRow) => (
+                          <div key={`subrow-${cellRow}`} className="contents">
+                            {Array(3)
+                              .fill(null)
+                              .map((_, cellCol) => {
+                                const row = gridRow * 3 + cellRow
+                                const col = gridCol * 3 + cellCol
+                                const cell = userGrid[row][col]
+                                const cage = getCage(row, col)
+                                const isSelected =
+                                  selectedCell?.row === row &&
+                                  selectedCell?.col === col
+
+                                return (
+                                  <SudokuCell
+                                    key={`${row}-${col}`}
+                                    cell={cell}
+                                    coord={{ row, col }}
+                                    cage={cage}
+                                    isSelected={isSelected}
+                                    cageColor={
+                                      cage
+                                        ? getCageColor(
+                                            puzzle.cages.indexOf(cage),
+                                            isDarkMode
+                                          )
+                                        : undefined
+                                    }
+                                    borders={{
+                                      top: false,
+                                      right: false,
+                                      bottom: false,
+                                      left: false,
+                                    }}
+                                    showCageSum={
+                                      cage?.cells[0].row === row &&
+                                      cage?.cells[0].col === col
+                                    }
+                                    onClick={handleCellClick}
+                                    onKeyDown={handleKeyDown}
+                                    registerCell={registerCell}
+                                  />
+                                )
+                              })}
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+              </div>
+            ))}
+        </div>
       </div>
 
       <NumberControls

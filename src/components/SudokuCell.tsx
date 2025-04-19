@@ -1,4 +1,4 @@
-import { KeyboardEvent } from 'react'
+import { useRef, useEffect, type KeyboardEvent } from 'react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { CellCoord, UserCell, Cage } from '@/types/game'
@@ -15,12 +15,13 @@ type SudokuCellProps = {
     bottom: boolean
     left: boolean
   }
-  showCageSum?: boolean
+  showCageSum: boolean
   onClick: (coord: CellCoord) => void
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>, coord: CellCoord) => void
+  registerCell?: (coord: CellCoord, element: HTMLElement | null) => void
 }
 
-export function SudokuCell({
+export const SudokuCell = ({
   cell,
   coord,
   cage,
@@ -30,9 +31,19 @@ export function SudokuCell({
   showCageSum,
   onClick,
   onKeyDown,
-}: SudokuCellProps) {
+  registerCell,
+}: SudokuCellProps) => {
+  const cellRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (registerCell) {
+      return registerCell(coord, cellRef.current)
+    }
+  }, [coord, registerCell])
+
   return (
     <Card
+      ref={cellRef}
       className={cn(
         'w-12 h-12 flex items-center justify-center relative',
         'focus:outline-none focus:ring-2 focus:ring-ring',
