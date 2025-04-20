@@ -33,24 +33,38 @@ export const useCagePaths = (
         const borders: CellBorder[] = []
 
         // Check left
-        if (col > 0 && !cells.some((c) => c.row === row && c.col === col - 1)) {
+        if (
+          col === 0 ||
+          (col > 0 && !cells.some((c) => c.row === row && c.col === col - 1))
+        ) {
           borders.push({ startCoord: cell, endCoord: cell, direction: 'left' })
         }
         // Check right
-        if (col < 8 && !cells.some((c) => c.row === row && c.col === col + 1)) {
+        if (
+          col === 8 ||
+          (col < 8 && !cells.some((c) => c.row === row && c.col === col + 1))
+        ) {
           borders.push({ startCoord: cell, endCoord: cell, direction: 'right' })
         }
         // Check up
-        if (row > 0 && !cells.some((c) => c.row === row - 1 && c.col === col)) {
+        if (
+          row === 0 ||
+          (row > 0 && !cells.some((c) => c.row === row - 1 && c.col === col))
+        ) {
           borders.push({ startCoord: cell, endCoord: cell, direction: 'up' })
         }
         // Check down
-        if (row < 8 && !cells.some((c) => c.row === row + 1 && c.col === col)) {
+        if (
+          row === 8 ||
+          (row < 8 && !cells.some((c) => c.row === row + 1 && c.col === col))
+        ) {
           borders.push({ startCoord: cell, endCoord: cell, direction: 'down' })
         }
 
         return borders
       })
+
+      console.log(`Cell borders ${cage.id}`, cellBorders)
 
       // Merge borders that are next to each other.
       const mergedBorders: CellBorder[] = []
@@ -62,32 +76,32 @@ export const useCagePaths = (
             existingBorder = mergedBorders.find(
               (b) =>
                 b.direction === 'left' &&
-                b.startCoord.row === border.startCoord.row &&
-                b.startCoord.col === border.startCoord.col - 1
+                b.startCoord.row === border.startCoord.row - 1 &&
+                b.startCoord.col === border.startCoord.col
             )
             break
           case 'right':
             existingBorder = mergedBorders.find(
               (b) =>
                 b.direction === 'right' &&
-                b.startCoord.row === border.startCoord.row &&
-                b.startCoord.col === border.startCoord.col + 1
+                b.startCoord.row === border.startCoord.row - 1 &&
+                b.startCoord.col === border.startCoord.col
             )
             break
           case 'up':
             existingBorder = mergedBorders.find(
               (b) =>
                 b.direction === 'up' &&
-                b.startCoord.row === border.startCoord.row - 1 &&
-                b.startCoord.col === border.startCoord.col
+                b.startCoord.row === border.startCoord.row &&
+                b.startCoord.col === border.startCoord.col - 1
             )
             break
           case 'down':
             existingBorder = mergedBorders.find(
               (b) =>
                 b.direction === 'down' &&
-                b.startCoord.row === border.startCoord.row + 1 &&
-                b.startCoord.col === border.startCoord.col
+                b.startCoord.row === border.startCoord.row &&
+                b.startCoord.col === border.startCoord.col - 1
             )
             break
         }
@@ -99,6 +113,7 @@ export const useCagePaths = (
           mergedBorders.push(border)
         }
       })
+      console.log(`merged Border ${cage.id}`, mergedBorders)
 
       // Convert merged borders to SVG path data
       const cagePaths = mergedBorders.map((border) => {
@@ -114,19 +129,18 @@ export const useCagePaths = (
         let path = ''
         switch (border.direction) {
           case 'left':
-            path = `M${startPos.left},${startPos.top} L${endPos.left},${endPos.top}`
-            break
-          case 'right':
-            path = `M${startPos.right},${startPos.top} L${endPos.right},${endPos.top}`
-            break
-          case 'up':
             path = `M${startPos.left},${startPos.top} L${endPos.left},${endPos.bottom}`
             break
+          case 'right':
+            path = `M${startPos.right},${startPos.top} L${endPos.right},${endPos.bottom}`
+            break
+          case 'up':
+            path = `M${startPos.left},${startPos.top} L${endPos.right},${endPos.top}`
+            break
           case 'down':
-            path = `M${startPos.left},${startPos.bottom} L${endPos.left},${endPos.bottom}`
+            path = `M${startPos.left},${startPos.bottom} L${endPos.right},${endPos.bottom}`
             break
         }
-        console.log('path', path)
         return path
       })
 
