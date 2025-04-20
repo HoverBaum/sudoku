@@ -92,7 +92,7 @@ export function SudokuGrid({
     <div className="flex flex-col gap-4">
       <div className="relative w-fit" data-sudoku-grid>
         <div
-          className="relative grid grid-cols-3 gap-2 bg-muted rounded-lg p-4"
+          className="relative grid grid-cols-3 gap-2"
           role="row"
           aria-label="Grid cells"
           data-grid-container
