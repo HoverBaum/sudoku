@@ -144,9 +144,63 @@ export const useCagePaths = (
         return path
       })
 
+      // Corners
+      // Find corners so that we can add paths that close those corners.
+      // There are four types of corners:
+      // 1. Top left corner
+      // 2. Top right corner
+      // 3. Bottom left corner
+      // 4. Bottom right corner
+      // Each corner mus consist of three cells within the same cage.
+      type CageCorner = {
+        cells: CellCoord[]
+        direction: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+      }
+      const corners: CageCorner[] = []
+      cellBorders.forEach((border) => {
+        const { startCoord, endCoord, direction } = border
+        // Based on direction check for corners.
+        if (direction === 'left') {
+          const bottomBorderToTopLeft = cellBorders.find(
+            (b) =>
+              b.direction === 'down' &&
+              b.endCoord.row === startCoord.row - 1 &&
+              b.endCoord.col === startCoord.col - 1
+          )
+          if (bottomBorderToTopLeft) {
+            const corner: CageCorner = {
+              cells: [bottomBorderToTopLeft.endCoord, startCoord],
+              direction: 'top-right',
+            }
+            if (!corners.some((c) => c.direction === corner.direction)) {
+              corners.push(corner)
+            }
+          }
+        }
+      })
+
+      // Create paths for each corner.
+      const cornerPaths: string[] = corners.map((corner) => {
+        const { cells, direction } = corner
+        cells.sort((a, b) => a.row - b.row || a.col - b.col)
+        if (direction === 'top-right') {
+          const topLeftCoord = cells[0]
+          const bottomRightCoord = cells[1]
+          const topLeftPos = cellPositions.get(
+            `${topLeftCoord.row}-${topLeftCoord.col}`
+          )
+          const bottomRightPos = cellPositions.get(
+            `${bottomRightCoord.row}-${bottomRightCoord.col}`
+          )
+          if (!topLeftPos || !bottomRightPos) return ''
+          return `M${topLeftPos.right},${topLeftPos.bottom} L${bottomRightPos.left},${topLeftPos.bottom} L${bottomRightPos.left},${bottomRightPos.top}`
+        }
+        return ''
+      })
+
       return {
         id: cage.id || 'missing_id',
-        paths: cagePaths,
+        paths: cagePaths.concat(cornerPaths),
       }
     })
     return cagePaths

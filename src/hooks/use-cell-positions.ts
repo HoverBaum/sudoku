@@ -59,7 +59,8 @@ export const useCellPositions = () => {
   const debouncedSetPositions = useRef(
     debounce(() => {
       setCellPositions(new Map(positionsRef.current))
-    }, 500) // Increased from 16ms to 100ms
+      // TODO: fix this! We need debounce because re-computeting the positions.
+    }, 1000)
   ).current
 
   useEffect(() => {
