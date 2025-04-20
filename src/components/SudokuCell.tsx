@@ -44,6 +44,7 @@ export const SudokuCell = ({
   return (
     <Card
       ref={cellRef}
+      data-cell-coord={`${coord.row}-${coord.col}`}
       className={cn(
         'w-12 h-12 flex items-center justify-center relative',
         'focus:outline-none focus:ring-2 focus:ring-ring',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { CellCoord } from '@/types/game'
 
 type CellPosition = {
@@ -12,102 +12,57 @@ type CellMap = Map<string, CellPosition>
 
 const getCellKey = (coord: CellCoord) => `${coord.row}-${coord.col}`
 
-const findPositionedParent = (element: HTMLElement): HTMLElement => {
-  let parent = element.parentElement
-  while (parent) {
-    const position = getComputedStyle(parent).position
-    if (position !== 'static') {
-      return parent
-    }
-    parent = parent.parentElement
-  }
-  return document.body
-}
-
-// Improved debounce utility with specific types
-const debounce = <Args extends unknown[]>(
-  fn: (...args: Args) => void,
-  ms = 100
-) => {
-  let timeoutId: ReturnType<typeof setTimeout>
-  return function (this: unknown, ...args: Args) {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => fn.apply(this, args), ms)
-  }
-}
-
-const hasPositionChanged = (
-  oldPos: CellPosition | undefined,
-  newPos: CellPosition
-): boolean => {
-  if (!oldPos) return true
-  const threshold = 1 // 1px threshold to avoid floating point issues
-  return (
-    Math.abs(oldPos.top - newPos.top) > threshold ||
-    Math.abs(oldPos.right - newPos.right) > threshold ||
-    Math.abs(oldPos.bottom - newPos.bottom) > threshold ||
-    Math.abs(oldPos.left - newPos.left) > threshold
-  )
-}
-
 export const useCellPositions = () => {
   const [cellPositions, setCellPositions] = useState<CellMap>(new Map())
-  const positionsRef = useRef<CellMap>(new Map())
-  const observerRef = useRef<ResizeObserver | null>(null)
 
-  // Create a debounced update function with a longer delay
-  const debouncedSetPositions = useRef(
-    debounce(() => {
-      setCellPositions(new Map(positionsRef.current))
-      // TODO: fix this! We need debounce because re-computeting the positions.
-    }, 1000)
-  ).current
+  const updateAllPositions = useCallback(() => {
+    const gridContainer = document.querySelector('[data-grid-container]')
+    if (!gridContainer) return
+
+    const containerRect = gridContainer.getBoundingClientRect()
+    const newPositions = new Map<string, CellPosition>()
+
+    const cells = gridContainer.querySelectorAll('[data-cell-coord]')
+    cells.forEach((cell) => {
+      const coordAttr = cell.getAttribute('data-cell-coord')
+      if (!coordAttr) return
+
+      const [row, col] = coordAttr.split('-').map(Number)
+      const rect = cell.getBoundingClientRect()
+
+      newPositions.set(getCellKey({ row, col }), {
+        top: Math.round(rect.top - containerRect.top),
+        right: Math.round(rect.right - containerRect.left),
+        bottom: Math.round(rect.bottom - containerRect.top),
+        left: Math.round(rect.left - containerRect.left),
+      })
+    })
+
+    setCellPositions(newPositions)
+  }, [])
 
   useEffect(() => {
-    observerRef.current = new ResizeObserver(debouncedSetPositions)
-    return () => observerRef.current?.disconnect()
-  }, [debouncedSetPositions])
+    const gridContainer = document.querySelector('[data-grid-container]')
+    if (!gridContainer) return
 
-  const updatePosition = useCallback(
-    (coord: CellCoord, element: HTMLElement) => {
-      const rect = element.getBoundingClientRect()
-      const positionedParent = findPositionedParent(element)
-      const parentRect = positionedParent.getBoundingClientRect()
+    // Initial position calculation
+    updateAllPositions()
 
-      const newPosition = {
-        top: Math.round(rect.top - parentRect.top),
-        right: Math.round(rect.right - parentRect.left),
-        bottom: Math.round(rect.bottom - parentRect.top),
-        left: Math.round(rect.left - parentRect.left),
-      }
+    // Set up resize observer
+    const observer = new ResizeObserver(() => {
+      updateAllPositions()
+    })
 
-      const key = getCellKey(coord)
-      const currentPosition = positionsRef.current.get(key)
+    observer.observe(gridContainer)
 
-      // Only update if position has actually changed beyond the threshold
-      if (hasPositionChanged(currentPosition, newPosition)) {
-        positionsRef.current.set(key, newPosition)
-        debouncedSetPositions()
-      }
-    },
-    [debouncedSetPositions]
-  )
+    return () => {
+      observer.disconnect()
+    }
+  }, [updateAllPositions])
 
-  const registerCell = useCallback(
-    (coord: CellCoord, element: HTMLElement | null) => {
-      if (!element || !observerRef.current) return
-
-      observerRef.current.observe(element)
-      updatePosition(coord, element)
-
-      return () => {
-        observerRef.current?.unobserve(element)
-        positionsRef.current.delete(getCellKey(coord))
-        debouncedSetPositions()
-      }
-    },
-    [updatePosition, debouncedSetPositions]
-  )
-
-  return { positions: cellPositions, registerCell }
+  return {
+    positions: cellPositions,
+    // Keep registerCell in the API for backwards compatibility, but it's now a no-op
+    registerCell: () => undefined,
+  }
 }
