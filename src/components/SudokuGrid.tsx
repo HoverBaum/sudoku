@@ -1,9 +1,8 @@
-import { useCallback, KeyboardEvent } from 'react'
-import { useTheme } from '@/components/theme-provider'
+import { useCallback, KeyboardEvent, useMemo } from 'react'
 import { getCageColor } from '@/lib/color-utils'
 import { useSudokuControls } from '@/hooks/use-sudoku-controls'
-import { useCageBoundaries } from '@/hooks/use-cage-boundaries'
 import { useCellPositions } from '@/hooks/use-cell-positions'
+import { useDarkMode } from '@/hooks/use-dark-mode'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
 import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
@@ -20,11 +19,7 @@ export function SudokuGrid({
   userGrid,
   onCellUpdate,
 }: SudokuGridProps) {
-  const { theme } = useTheme()
-  const isDarkMode =
-    theme === 'dark' ||
-    (theme === 'system' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const isDarkMode = useDarkMode()
 
   const {
     isNoteMode,
@@ -37,15 +32,17 @@ export function SudokuGrid({
 
   const { positions, registerCell } = useCellPositions()
   const cageBoundaries = useCagePaths(puzzle, positions)
-  console.log('Cage Boundaries:', cageBoundaries)
+  console.log(cageBoundaries)
+
+  const memoizedPuzzle = useMemo(() => puzzle, [puzzle])
 
   const getCage = useCallback(
     (row: number, col: number) => {
-      return puzzle.cages.find((cage) =>
+      return memoizedPuzzle.cages.find((cage) =>
         cage.cells.some((cell) => cell.row === row && cell.col === col)
       )
     },
-    [puzzle.cages]
+    [memoizedPuzzle]
   )
 
   const handleKeyDown = useCallback(

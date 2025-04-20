@@ -36,16 +36,30 @@ const debounce = <Args extends unknown[]>(
   }
 }
 
+const hasPositionChanged = (
+  oldPos: CellPosition | undefined,
+  newPos: CellPosition
+): boolean => {
+  if (!oldPos) return true
+  const threshold = 1 // 1px threshold to avoid floating point issues
+  return (
+    Math.abs(oldPos.top - newPos.top) > threshold ||
+    Math.abs(oldPos.right - newPos.right) > threshold ||
+    Math.abs(oldPos.bottom - newPos.bottom) > threshold ||
+    Math.abs(oldPos.left - newPos.left) > threshold
+  )
+}
+
 export const useCellPositions = () => {
   const [cellPositions, setCellPositions] = useState<CellMap>(new Map())
   const positionsRef = useRef<CellMap>(new Map())
   const observerRef = useRef<ResizeObserver | null>(null)
 
-  // Create a debounced update function
+  // Create a debounced update function with a longer delay
   const debouncedSetPositions = useRef(
     debounce(() => {
       setCellPositions(new Map(positionsRef.current))
-    }, 16) // roughly one frame
+    }, 500) // Increased from 16ms to 100ms
   ).current
 
   useEffect(() => {
@@ -69,13 +83,8 @@ export const useCellPositions = () => {
       const key = getCellKey(coord)
       const currentPosition = positionsRef.current.get(key)
 
-      // Only update if position has actually changed
-      if (
-        !currentPosition ||
-        Object.entries(newPosition).some(
-          ([key, value]) => currentPosition[key as keyof CellPosition] !== value
-        )
-      ) {
+      // Only update if position has actually changed beyond the threshold
+      if (hasPositionChanged(currentPosition, newPosition)) {
         positionsRef.current.set(key, newPosition)
         debouncedSetPositions()
       }
