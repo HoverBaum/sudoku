@@ -201,6 +201,42 @@ export const useCagePaths = (
             corners.push(corner)
           }
         }
+
+        if (direction === 'right') {
+          // Top left corner
+          const bottomBorderToTopRight = cellBorders.find(
+            (b) =>
+              b.direction === 'down' &&
+              b.endCoord.row === startCoord.row - 1 &&
+              b.endCoord.col === startCoord.col + 1
+          )
+          if (bottomBorderToTopRight) {
+            const corner: CageCorner = {
+              cells: [bottomBorderToTopRight.endCoord, startCoord].sort(
+                sortCornerCells
+              ),
+              direction: 'top-left',
+            }
+            corners.push(corner)
+          }
+
+          // Bottom left corner
+          const topBorderToBottomRight = cellBorders.find(
+            (b) =>
+              b.direction === 'up' &&
+              b.endCoord.row === startCoord.row + 1 &&
+              b.endCoord.col === startCoord.col + 1
+          )
+          if (topBorderToBottomRight) {
+            const corner: CageCorner = {
+              cells: [topBorderToBottomRight.endCoord, startCoord].sort(
+                sortCornerCells
+              ),
+              direction: 'bottom-left',
+            }
+            corners.push(corner)
+          }
+        }
       })
 
       // Create paths for each corner.
@@ -231,6 +267,34 @@ export const useCagePaths = (
           if (!topRightPos || !bottomLeftPos) return ''
           return `M${topRightPos.left},${topRightPos.bottom} L${topRightPos.left},${bottomLeftPos.top} L${bottomLeftPos.right},${bottomLeftPos.top}`
         }
+
+        if (direction === 'top-left') {
+          const topRightCoord = cells[0]
+          const bottomLeftCoord = cells[1]
+          const topRightPos = cellPositions.get(
+            `${topRightCoord.row}-${topRightCoord.col}`
+          )
+          const bottomLeftPos = cellPositions.get(
+            `${bottomLeftCoord.row}-${bottomLeftCoord.col}`
+          )
+          if (!topRightPos || !bottomLeftPos) return ''
+          return `M${topRightPos.left},${topRightPos.bottom} L${bottomLeftPos.right},${topRightPos.bottom} L${bottomLeftPos.right},${bottomLeftPos.top}`
+        }
+
+        if (direction === 'bottom-left') {
+          const topLeftCoord = cells[0]
+          const bottomRightCoord = cells[1]
+          const topLeftPos = cellPositions.get(
+            `${topLeftCoord.row}-${topLeftCoord.col}`
+          )
+          const bottomRightPos = cellPositions.get(
+            `${bottomRightCoord.row}-${bottomRightCoord.col}`
+          )
+          if (!topLeftPos || !bottomRightPos) return ''
+          return `M${topLeftPos.right},${topLeftPos.bottom} L${topLeftPos.right},${bottomRightPos.top} L${bottomRightPos.left},${bottomRightPos.top}`
+        }
+
+        // If the direction is not recognized, return an empty string.
         return ''
       })
 
