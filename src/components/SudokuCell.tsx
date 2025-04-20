@@ -66,9 +66,9 @@ export const SudokuCell = ({
       onClick={() => !cell.isPreFilled && onClick(coord)}
       onKeyDown={(e) => !cell.isPreFilled && onKeyDown(e, coord)}
     >
-      {/* <span className="absolute top-0 left-0">row: {coord.row}</span>
+      <span className="absolute top-0 left-0">row: {coord.row}</span>
       <span className="absolute top-4 left-0">col: {coord.col}</span>
-      <span className="absolute top-8 left-0">{cageColor?.substring(3)}</span> */}
+      <span className="absolute top-8 left-0">{cageColor?.substring(3)}</span>
       {showCageSum && cage && (
         <span
           className="absolute top-0.5 left-1 text-sm text-muted-foreground"

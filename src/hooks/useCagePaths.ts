@@ -19,6 +19,13 @@ type CageBoundary = {
   paths: string[]
 }
 
+const sortCornerCells = (a: CellCoord, b: CellCoord) => {
+  if (a.row === b.row) {
+    return a.col - b.col
+  }
+  return a.row - b.row
+}
+
 export const useCagePaths = (
   puzzle: SumSudokuPuzzle,
   cellPositions: Map<string, CellPosition>
@@ -151,7 +158,6 @@ export const useCagePaths = (
       // 2. Top right corner
       // 3. Bottom left corner
       // 4. Bottom right corner
-      // Each corner mus consist of three cells within the same cage.
       type CageCorner = {
         cells: CellCoord[]
         direction: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
@@ -161,6 +167,7 @@ export const useCagePaths = (
         const { startCoord, endCoord, direction } = border
         // Based on direction check for corners.
         if (direction === 'left') {
+          // Top right corner
           const bottomBorderToTopLeft = cellBorders.find(
             (b) =>
               b.direction === 'down' &&
@@ -169,12 +176,29 @@ export const useCagePaths = (
           )
           if (bottomBorderToTopLeft) {
             const corner: CageCorner = {
-              cells: [bottomBorderToTopLeft.endCoord, startCoord],
+              cells: [bottomBorderToTopLeft.endCoord, startCoord].sort(
+                sortCornerCells
+              ),
               direction: 'top-right',
             }
-            if (!corners.some((c) => c.direction === corner.direction)) {
-              corners.push(corner)
+            corners.push(corner)
+          }
+
+          // Bottom right corner
+          const topBorderToBottomLeft = cellBorders.find(
+            (b) =>
+              b.direction === 'up' &&
+              b.endCoord.row === startCoord.row + 1 &&
+              b.endCoord.col === startCoord.col - 1
+          )
+          if (topBorderToBottomLeft) {
+            const corner: CageCorner = {
+              cells: [topBorderToBottomLeft.endCoord, startCoord].sort(
+                sortCornerCells
+              ),
+              direction: 'bottom-right',
             }
+            corners.push(corner)
           }
         }
       })
@@ -182,7 +206,6 @@ export const useCagePaths = (
       // Create paths for each corner.
       const cornerPaths: string[] = corners.map((corner) => {
         const { cells, direction } = corner
-        cells.sort((a, b) => a.row - b.row || a.col - b.col)
         if (direction === 'top-right') {
           const topLeftCoord = cells[0]
           const bottomRightCoord = cells[1]
@@ -194,6 +217,19 @@ export const useCagePaths = (
           )
           if (!topLeftPos || !bottomRightPos) return ''
           return `M${topLeftPos.right},${topLeftPos.bottom} L${bottomRightPos.left},${topLeftPos.bottom} L${bottomRightPos.left},${bottomRightPos.top}`
+        }
+
+        if (direction === 'bottom-right') {
+          const topRightCoord = cells[0]
+          const bottomLeftCoord = cells[1]
+          const topRightPos = cellPositions.get(
+            `${topRightCoord.row}-${topRightCoord.col}`
+          )
+          const bottomLeftPos = cellPositions.get(
+            `${bottomLeftCoord.row}-${bottomLeftCoord.col}`
+          )
+          if (!topRightPos || !bottomLeftPos) return ''
+          return `M${topRightPos.left},${topRightPos.bottom} L${topRightPos.left},${bottomLeftPos.top} L${bottomLeftPos.right},${bottomLeftPos.top}`
         }
         return ''
       })
