@@ -5,8 +5,88 @@ import { useCellPositions } from '@/hooks/use-cell-positions'
 import { useDarkMode } from '@/hooks/use-dark-mode'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
-import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
+import type { SumSudokuPuzzle, UserGrid, CellCoord, Cage } from '@/types/game'
 import { useCagePaths } from '@/hooks/useCagePaths'
+
+type SudokuSubGridProps = {
+  gridRow: number
+  gridCol: number
+  userGrid: UserGrid
+  puzzle: SumSudokuPuzzle
+  selectedCell: CellCoord | null
+  isDarkMode: boolean
+  getCage: (row: number, col: number) => Cage | undefined
+  handleCellClick: (coord: CellCoord) => void
+  handleKeyDown: (e: KeyboardEvent<HTMLDivElement>, coord: CellCoord) => void
+  registerCell:
+    | ((coord: CellCoord, element: HTMLElement | null) => void)
+    | undefined
+}
+
+const SudokuSubGrid = ({
+  gridRow,
+  gridCol,
+  userGrid,
+  puzzle,
+  selectedCell,
+  isDarkMode,
+  getCage,
+  handleCellClick,
+  handleKeyDown,
+  registerCell,
+}: SudokuSubGridProps) => {
+  return (
+    <div
+      key={`grid-${gridRow}-${gridCol}`}
+      className="grid grid-cols-3 gap-2 p-1"
+      data-subgrid={`${gridRow}-${gridCol}`}
+    >
+      {Array(3)
+        .fill(null)
+        .map((_, cellRow) => (
+          <div key={`subrow-${cellRow}`} className="contents">
+            {Array(3)
+              .fill(null)
+              .map((_, cellCol) => {
+                const row = gridRow * 3 + cellRow
+                const col = gridCol * 3 + cellCol
+                const cell = userGrid[row][col]
+                const cage = getCage(row, col)
+                const isSelected =
+                  selectedCell?.row === row && selectedCell?.col === col
+
+                return (
+                  <SudokuCell
+                    key={`${row}-${col}`}
+                    cell={cell}
+                    coord={{ row, col }}
+                    cage={cage}
+                    isSelected={isSelected}
+                    cageColor={
+                      cage
+                        ? getCageColor(puzzle.cages.indexOf(cage), isDarkMode)
+                        : undefined
+                    }
+                    borders={{
+                      top: false,
+                      right: false,
+                      bottom: false,
+                      left: false,
+                    }}
+                    showCageSum={
+                      cage?.cells[0].row === row && cage?.cells[0].col === col
+                    }
+                    onClick={handleCellClick}
+                    onKeyDown={handleKeyDown}
+                    registerCell={registerCell}
+                  />
+                )
+              })}
+          </div>
+        ))}
+    </div>
+  )
+}
 
 type SudokuGridProps = {
   puzzle: SumSudokuPuzzle
@@ -36,7 +116,7 @@ export function SudokuGrid({
   const memoizedPuzzle = useMemo(() => puzzle, [puzzle])
 
   const getCage = useCallback(
-    (row: number, col: number) => {
+    (row: number, col: number): Cage | undefined => {
       return memoizedPuzzle.cages.find((cage) =>
         cage.cells.some((cell) => cell.row === row && cell.col === col)
       )
@@ -123,59 +203,19 @@ export function SudokuGrid({
                 {Array(3)
                   .fill(null)
                   .map((_, gridCol) => (
-                    <div
-                      key={`grid-${gridRow}-${gridCol}`}
-                      className="grid grid-cols-3 gap-2 p-1"
-                    >
-                      {Array(3)
-                        .fill(null)
-                        .map((_, cellRow) => (
-                          <div key={`subrow-${cellRow}`} className="contents">
-                            {Array(3)
-                              .fill(null)
-                              .map((_, cellCol) => {
-                                const row = gridRow * 3 + cellRow
-                                const col = gridCol * 3 + cellCol
-                                const cell = userGrid[row][col]
-                                const cage = getCage(row, col)
-                                const isSelected =
-                                  selectedCell?.row === row &&
-                                  selectedCell?.col === col
-
-                                return (
-                                  <SudokuCell
-                                    key={`${row}-${col}`}
-                                    cell={cell}
-                                    coord={{ row, col }}
-                                    cage={cage}
-                                    isSelected={isSelected}
-                                    cageColor={
-                                      cage
-                                        ? getCageColor(
-                                            puzzle.cages.indexOf(cage),
-                                            isDarkMode
-                                          )
-                                        : undefined
-                                    }
-                                    borders={{
-                                      top: false,
-                                      right: false,
-                                      bottom: false,
-                                      left: false,
-                                    }}
-                                    showCageSum={
-                                      cage?.cells[0].row === row &&
-                                      cage?.cells[0].col === col
-                                    }
-                                    onClick={handleCellClick}
-                                    onKeyDown={handleKeyDown}
-                                    registerCell={registerCell}
-                                  />
-                                )
-                              })}
-                          </div>
-                        ))}
-                    </div>
+                    <SudokuSubGrid
+                      key={`${gridRow}-${gridCol}`}
+                      gridRow={gridRow}
+                      gridCol={gridCol}
+                      userGrid={userGrid}
+                      puzzle={puzzle}
+                      selectedCell={selectedCell}
+                      isDarkMode={isDarkMode}
+                      getCage={getCage}
+                      handleCellClick={handleCellClick}
+                      handleKeyDown={handleKeyDown}
+                      registerCell={registerCell}
+                    />
                   ))}
               </div>
             ))}
