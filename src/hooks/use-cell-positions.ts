@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { CellCoord } from '@/types/game'
 
 type CellPosition = {
@@ -24,59 +24,80 @@ const findPositionedParent = (element: HTMLElement): HTMLElement => {
   return document.body
 }
 
+// Improved debounce utility with specific types
+const debounce = <Args extends unknown[]>(
+  fn: (...args: Args) => void,
+  ms = 100
+) => {
+  let timeoutId: ReturnType<typeof setTimeout>
+  return function (this: unknown, ...args: Args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn.apply(this, args), ms)
+  }
+}
+
 export const useCellPositions = () => {
   const [cellPositions, setCellPositions] = useState<CellMap>(new Map())
-  const [observer, setObserver] = useState<ResizeObserver | null>(null)
+  const positionsRef = useRef<CellMap>(new Map())
+  const observerRef = useRef<ResizeObserver | null>(null)
+
+  // Create a debounced update function
+  const debouncedSetPositions = useRef(
+    debounce(() => {
+      setCellPositions(new Map(positionsRef.current))
+    }, 16) // roughly one frame
+  ).current
 
   useEffect(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      setCellPositions((currentMap) => new Map(currentMap))
-    })
-    setObserver(resizeObserver)
+    observerRef.current = new ResizeObserver(debouncedSetPositions)
+    return () => observerRef.current?.disconnect()
+  }, [debouncedSetPositions])
 
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [])
+  const updatePosition = useCallback(
+    (coord: CellCoord, element: HTMLElement) => {
+      const rect = element.getBoundingClientRect()
+      const positionedParent = findPositionedParent(element)
+      const parentRect = positionedParent.getBoundingClientRect()
+
+      const newPosition = {
+        top: Math.round(rect.top - parentRect.top),
+        right: Math.round(rect.right - parentRect.left),
+        bottom: Math.round(rect.bottom - parentRect.top),
+        left: Math.round(rect.left - parentRect.left),
+      }
+
+      const key = getCellKey(coord)
+      const currentPosition = positionsRef.current.get(key)
+
+      // Only update if position has actually changed
+      if (
+        !currentPosition ||
+        Object.entries(newPosition).some(
+          ([key, value]) => currentPosition[key as keyof CellPosition] !== value
+        )
+      ) {
+        positionsRef.current.set(key, newPosition)
+        debouncedSetPositions()
+      }
+    },
+    [debouncedSetPositions]
+  )
 
   const registerCell = useCallback(
     (coord: CellCoord, element: HTMLElement | null) => {
-      if (!element || !observer) return
+      if (!element || !observerRef.current) return
 
-      observer.observe(element)
-
-      const updatePosition = () => {
-        const rect = element.getBoundingClientRect()
-        const positionedParent = findPositionedParent(element)
-        const parentRect = positionedParent.getBoundingClientRect()
-
-        setCellPositions((current) =>
-          new Map(current).set(getCellKey(coord), {
-            top: rect.top - parentRect.top,
-            right: rect.right - parentRect.left,
-            bottom: rect.bottom - parentRect.top,
-            left: rect.left - parentRect.left,
-          })
-        )
-      }
-
-      // Initial position calculation
-      updatePosition()
+      observerRef.current.observe(element)
+      updatePosition(coord, element)
 
       return () => {
-        observer.unobserve(element)
-        setCellPositions((current) => {
-          const newMap = new Map(current)
-          newMap.delete(getCellKey(coord))
-          return newMap
-        })
+        observerRef.current?.unobserve(element)
+        positionsRef.current.delete(getCellKey(coord))
+        debouncedSetPositions()
       }
     },
-    [observer]
+    [updatePosition, debouncedSetPositions]
   )
 
-  return {
-    positions: cellPositions,
-    registerCell,
-  }
+  return { positions: cellPositions, registerCell }
 }

@@ -7,6 +7,7 @@ import { useCellPositions } from '@/hooks/use-cell-positions'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
 import type { SumSudokuPuzzle, UserGrid, CellCoord } from '@/types/game'
+import { useCagePaths } from '@/hooks/useCagePaths'
 
 type SudokuGridProps = {
   puzzle: SumSudokuPuzzle
@@ -35,7 +36,8 @@ export function SudokuGrid({
   } = useSudokuControls(userGrid, onCellUpdate)
 
   const { positions, registerCell } = useCellPositions()
-  const cageBoundaries = useCageBoundaries(puzzle, positions)
+  const cageBoundaries = useCagePaths(puzzle, positions)
+  console.log('Cage Boundaries:', cageBoundaries)
 
   const getCage = useCallback(
     (row: number, col: number) => {
