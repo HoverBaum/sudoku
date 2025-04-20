@@ -75,51 +75,57 @@ export const useCagePaths = (
 
       // Merge borders that are next to each other.
       const mergedBorders: CellBorder[] = []
-      cellBorders.forEach((border) => {
-        let existingBorder: CellBorder | undefined
-        // Depending on the borders direction, find the existing border to merge with.
-        switch (border.direction) {
-          case 'left':
-            existingBorder = mergedBorders.find(
-              (b) =>
-                b.direction === 'left' &&
-                b.startCoord.row === border.startCoord.row - 1 &&
-                b.startCoord.col === border.startCoord.col
-            )
-            break
-          case 'right':
-            existingBorder = mergedBorders.find(
-              (b) =>
-                b.direction === 'right' &&
-                b.startCoord.row === border.startCoord.row - 1 &&
-                b.startCoord.col === border.startCoord.col
-            )
-            break
-          case 'up':
-            existingBorder = mergedBorders.find(
-              (b) =>
-                b.direction === 'up' &&
-                b.startCoord.row === border.startCoord.row &&
-                b.startCoord.col === border.startCoord.col - 1
-            )
-            break
-          case 'down':
-            existingBorder = mergedBorders.find(
-              (b) =>
-                b.direction === 'down' &&
-                b.startCoord.row === border.startCoord.row &&
-                b.startCoord.col === border.startCoord.col - 1
-            )
-            break
-        }
-        // If an existing border is found, merge the end coordinates.
-        // Otherwise, add the new border to the merged borders.
-        if (existingBorder) {
-          existingBorder.endCoord = border.endCoord
-        } else {
-          mergedBorders.push(border)
-        }
-      })
+      cellBorders
+        .sort(
+          (a, b) =>
+            a.startCoord.row - b.startCoord.row ||
+            a.startCoord.col - b.startCoord.col
+        )
+        .forEach((border) => {
+          let existingBorder: CellBorder | undefined
+          // Depending on the borders direction, find the existing border to merge with.
+          switch (border.direction) {
+            case 'left':
+              existingBorder = mergedBorders.find(
+                (b) =>
+                  b.direction === 'left' &&
+                  b.endCoord.row === border.startCoord.row - 1 &&
+                  b.endCoord.col === border.startCoord.col
+              )
+              break
+            case 'right':
+              existingBorder = mergedBorders.find(
+                (b) =>
+                  b.direction === 'right' &&
+                  b.endCoord.row === border.startCoord.row - 1 &&
+                  b.endCoord.col === border.startCoord.col
+              )
+              break
+            case 'up':
+              existingBorder = mergedBorders.find(
+                (b) =>
+                  b.direction === 'up' &&
+                  b.endCoord.row === border.startCoord.row &&
+                  b.endCoord.col === border.startCoord.col - 1
+              )
+              break
+            case 'down':
+              existingBorder = mergedBorders.find(
+                (b) =>
+                  b.direction === 'down' &&
+                  b.endCoord.row === border.startCoord.row &&
+                  b.endCoord.col === border.startCoord.col - 1
+              )
+              break
+          }
+          // If an existing border is found, merge the end coordinates.
+          // Otherwise, add the new border to the merged borders.
+          if (existingBorder) {
+            existingBorder.endCoord = border.endCoord
+          } else {
+            mergedBorders.push(border)
+          }
+        })
       console.log(`merged Border ${cage.id}`, mergedBorders)
 
       // Convert merged borders to SVG path data
@@ -164,7 +170,7 @@ export const useCagePaths = (
       }
       const corners: CageCorner[] = []
       cellBorders.forEach((border) => {
-        const { startCoord, endCoord, direction } = border
+        const { startCoord, direction } = border
         // Based on direction check for corners.
         if (direction === 'left') {
           // Top right corner
