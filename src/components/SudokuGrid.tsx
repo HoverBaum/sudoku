@@ -32,7 +32,6 @@ export function SudokuGrid({
 
   const { positions, registerCell } = useCellPositions()
   const cageBoundaries = useCagePaths(puzzle, positions)
-  console.log(cageBoundaries)
 
   const memoizedPuzzle = useMemo(() => puzzle, [puzzle])
 

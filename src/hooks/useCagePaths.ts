@@ -71,9 +71,6 @@ export const useCagePaths = (
         return borders
       })
 
-      console.log(`Cell borders ${cage.id}`, cellBorders)
-
-      // Merge borders that are next to each other.
       const mergedBorders: CellBorder[] = []
       cellBorders
         .sort(
@@ -126,7 +123,6 @@ export const useCagePaths = (
             mergedBorders.push(border)
           }
         })
-      console.log(`merged Border ${cage.id}`, mergedBorders)
 
       // Convert merged borders to SVG path data
       const cagePaths = mergedBorders.map((border) => {
