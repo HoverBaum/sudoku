@@ -5,6 +5,7 @@ import { useCellPositions } from '@/hooks/use-cell-positions'
 import { useDarkMode } from '@/hooks/use-dark-mode'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
+import { Separator } from './ui/separator'
 import type { SumSudokuPuzzle, UserGrid, CellCoord, Cage } from '@/types/game'
 import { useCagePaths } from '@/hooks/useCagePaths'
 
@@ -177,6 +178,26 @@ export function SudokuGrid({
           aria-label="Grid cells"
           data-grid-container
         >
+          {/* Vertical separators */}
+          <Separator
+            orientation="vertical"
+            className="absolute left-[33.33%] h-full -translate-x-1/2 z-[5]  bg-foreground w-[2px]"
+          />
+          <Separator
+            orientation="vertical"
+            className="absolute left-[66.66%] h-full -translate-x-1/2 z-[5]  bg-foreground w-[2px]"
+          />
+
+          {/* Horizontal separators */}
+          <Separator
+            orientation="horizontal"
+            className="absolute top-[33.33%] w-full -translate-y-1/2 z-[5]  bg-foreground h-[2px]"
+          />
+          <Separator
+            orientation="horizontal"
+            className="absolute top-[66.66%] w-full -translate-y-1/2 z-[5]  bg-foreground h-[2px]"
+          />
+
           <svg
             className="absolute inset-0 pointer-events-none z-10"
             style={{ overflow: 'visible' }}
