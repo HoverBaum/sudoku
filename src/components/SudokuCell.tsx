@@ -49,6 +49,7 @@ export const SudokuCell = ({
         'w-12 h-12 flex items-center justify-center relative',
         'focus:outline-none focus:ring-2 focus:ring-ring',
         'cursor-pointer select-none transition-colors duration-200',
+        'rounded-none',
         {
           'border-t-2': borders.top,
           'border-r-2': borders.right,

@@ -107,7 +107,7 @@ export function SudokuGrid({
               <g key={boundary.id}>
                 <path
                   d={boundary.paths.join(' ')}
-                  className="stroke-foreground stroke-2"
+                  className="stroke-foreground/35 stroke-2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray="4 3"
