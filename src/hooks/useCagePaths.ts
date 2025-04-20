@@ -104,9 +104,9 @@ export const useCagePaths = (
       const cagePaths = mergedBorders.map((border) => {
         const { startCoord, endCoord } = border
         const startPos = cellPositions.get(
-          `${startCoord.row},${startCoord.col}`
+          `${startCoord.row}-${startCoord.col}`
         )
-        const endPos = cellPositions.get(`${endCoord.row},${endCoord.col}`)
+        const endPos = cellPositions.get(`${endCoord.row}-${endCoord.col}`)
 
         if (!startPos || !endPos) return ''
 
