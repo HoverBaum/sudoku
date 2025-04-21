@@ -44,13 +44,13 @@ describe('storage utilities', () => {
     progress.grid[1][1].notes = [1, 2, 3]
 
     saveProgress(progress)
-    const loaded = loadProgress('test123', 'medium')
+    const loaded = loadProgress()
 
     expect(loaded).toEqual(progress)
   })
 
   test('loadProgress returns null for non-existent puzzle', () => {
-    const loaded = loadProgress('nonexistent', 'easy')
+    const loaded = loadProgress()
     expect(loaded).toBeNull()
   })
 
