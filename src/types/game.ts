@@ -39,3 +39,8 @@ export type UserProgress = {
   grid: UserGrid
   lastUpdated: number
 }
+
+export type CageBoundary = {
+  id: string
+  paths: string[]
+}

@@ -1,4 +1,5 @@
 import { CellCoord, SumSudokuPuzzle } from '@/types/game'
+import { optimizeCagePaths } from '@/lib/path-utils'
 import { useMemo } from 'react'
 
 const INSET = 4
@@ -326,10 +327,10 @@ export const useCagePaths = (
         return ''
       })
 
-      return {
+      return optimizeCagePaths({
         id: cage.id || 'missing_id',
         paths: cagePaths.concat(cornerPaths),
-      }
+      })
     })
     return cagePaths
   }, [puzzle, cellPositions])
