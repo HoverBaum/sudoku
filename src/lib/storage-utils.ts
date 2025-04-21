@@ -1,20 +1,15 @@
 import type { Difficulty, UserProgress } from '@/types/game'
 import { createEmptyGrid } from './game-utils'
 
-const STORAGE_PREFIX = 'sumSudoku:progress:'
-const DEBUG_MODE_KEY = 'sumSudoku:debugMode'
+const ACTIVE_GAME_KEY = 'sudoku:activeGame'
+const DEBUG_MODE_KEY = 'sudoku:debugMode'
 
 export function saveProgress(progress: UserProgress): void {
-  const key = `${STORAGE_PREFIX}${progress.puzzleSeed}:${progress.difficulty}`
-  localStorage.setItem(key, JSON.stringify(progress))
+  localStorage.setItem(ACTIVE_GAME_KEY, JSON.stringify(progress))
 }
 
-export function loadProgress(
-  seed: string,
-  difficulty: Difficulty
-): UserProgress | null {
-  const key = `${STORAGE_PREFIX}${seed}:${difficulty}`
-  const stored = localStorage.getItem(key)
+export function loadProgress(): UserProgress | null {
+  const stored = localStorage.getItem(ACTIVE_GAME_KEY)
 
   if (!stored) return null
 
