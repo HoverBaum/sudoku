@@ -197,6 +197,44 @@ describe('validateGrid', () => {
 
     expect(validateGrid(userGrid, puzzle)).toBe(false)
   })
+
+  test('detects duplicate values within a cage', () => {
+    const testPuzzle: SumSudokuPuzzle = {
+      seed: 'test',
+      difficulty: 'medium',
+      cages: [
+        {
+          sum: 8,
+          cells: [
+            { row: 0, col: 0 },
+            { row: 0, col: 1 },
+            { row: 0, col: 2 },
+          ],
+          id: '1',
+        },
+      ],
+      solution: [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [4, 5, 6, 7, 8, 9, 1, 2, 3],
+        [7, 8, 9, 1, 2, 3, 4, 5, 6],
+        [2, 3, 1, 5, 6, 4, 8, 9, 7],
+        [5, 6, 4, 8, 9, 7, 2, 3, 1],
+        [8, 9, 7, 2, 3, 1, 5, 6, 4],
+        [3, 1, 2, 6, 4, 5, 9, 7, 8],
+        [6, 4, 5, 9, 7, 8, 3, 1, 2],
+        [9, 7, 8, 3, 1, 2, 6, 4, 5],
+      ],
+      preFilledCells: [],
+    }
+
+    const userGrid: UserGrid = createEmptyGrid()
+    // Put duplicate value 4 in the cage
+    userGrid[0][0].value = 4
+    userGrid[0][1].value = 4
+    userGrid[0][2].value = undefined
+
+    expect(validateGrid(userGrid, testPuzzle)).toBe(false)
+  })
 })
 
 describe('generated puzzle properties', () => {
@@ -245,5 +283,40 @@ describe('generated puzzle properties', () => {
         expect(seen.size).toBe(9)
       }
     }
+  })
+
+  test('cages never contain duplicate numbers', () => {
+    const difficulties: Difficulty[] = ['easy', 'medium', 'hard']
+    const seeds = ['test1', 'test2', 'test3']
+
+    for (const difficulty of difficulties) {
+      for (const seed of seeds) {
+        const puzzle = generatePuzzle(seed, difficulty)
+
+        // Check each cage for duplicates
+        puzzle.cages.forEach((cage) => {
+          const values = cage.cells.map(
+            (cell) => puzzle.solution![cell.row][cell.col]
+          )
+          const uniqueValues = new Set(values)
+          expect(
+            uniqueValues.size,
+            `Found duplicate numbers in cage with seed ${seed} and difficulty ${difficulty}`
+          ).toBe(values.length)
+        })
+      }
+    }
+  })
+
+  test('cages sum values match solution', () => {
+    const puzzle = generatePuzzle('test123', 'medium')
+
+    puzzle.cages.forEach((cage) => {
+      const sum = cage.cells.reduce(
+        (acc, cell) => acc + puzzle.solution![cell.row][cell.col],
+        0
+      )
+      expect(sum).toBe(cage.sum)
+    })
   })
 })

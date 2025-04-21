@@ -120,17 +120,48 @@ function generateCages(
   const markCellUsed = (row: number, col: number) =>
     cellsInCages.add(`${row},${col}`)
 
-  // Helper to get available neighbors
-  const getAvailableNeighbors = (row: number, col: number): CellCoord[] => {
+  // Helper to check if adding a cell would create duplicates
+  const wouldCreateDuplicates = (
+    existingCells: CellCoord[],
+    newCell: CellCoord
+  ): boolean => {
+    const newValue = solution[newCell.row][newCell.col]
+    return existingCells.some(
+      (cell) => solution[cell.row][cell.col] === newValue
+    )
+  }
+
+  // Helper to get available neighbors that won't create duplicates
+  const getAvailableNeighbors = (
+    row: number,
+    col: number,
+    currentCells: CellCoord[] = []
+  ): CellCoord[] => {
     const neighbors: CellCoord[] = []
-    if (row > 0 && isCellAvailable(row - 1, col))
-      neighbors.push({ row: row - 1, col })
-    if (row < 8 && isCellAvailable(row + 1, col))
-      neighbors.push({ row: row + 1, col })
-    if (col > 0 && isCellAvailable(row, col - 1))
-      neighbors.push({ row, col: col - 1 })
-    if (col < 8 && isCellAvailable(row, col + 1))
-      neighbors.push({ row, col: col + 1 })
+    if (row > 0 && isCellAvailable(row - 1, col)) {
+      const cell = { row: row - 1, col }
+      if (!wouldCreateDuplicates(currentCells, cell)) {
+        neighbors.push(cell)
+      }
+    }
+    if (row < 8 && isCellAvailable(row + 1, col)) {
+      const cell = { row: row + 1, col }
+      if (!wouldCreateDuplicates(currentCells, cell)) {
+        neighbors.push(cell)
+      }
+    }
+    if (col > 0 && isCellAvailable(row, col - 1)) {
+      const cell = { row, col: col - 1 }
+      if (!wouldCreateDuplicates(currentCells, cell)) {
+        neighbors.push(cell)
+      }
+    }
+    if (col < 8 && isCellAvailable(row, col + 1)) {
+      const cell = { row, col: col + 1 }
+      if (!wouldCreateDuplicates(currentCells, cell)) {
+        neighbors.push(cell)
+      }
+    }
     return neighbors
   }
 
@@ -138,7 +169,7 @@ function generateCages(
   const findStartingPoint = (): CellCoord | null => {
     const { offsetRow = 0, offsetCol = 0 } = offsets || {}
 
-    // First try to find cells that have neighbors, starting from the offset position
+    // First try to find cells that have neighbors
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
         const row = (i + offsetRow) % 9
@@ -152,32 +183,7 @@ function generateCages(
       }
     }
 
-    // If no cells with neighbors found, find any available cell
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        const row = (i + offsetRow) % 9
-        const col = (j + offsetCol) % 9
-        if (isCellAvailable(row, col)) {
-          // For the last few cells, we might need to connect to already used cells
-          const possibleNeighbors = [
-            { row: row - 1, col },
-            { row: row + 1, col },
-            { row, col: col - 1 },
-            { row, col: col + 1 },
-          ].filter((n) => n.row >= 0 && n.row < 9 && n.col >= 0 && n.col < 9)
-
-          // Check if this cell is adjacent to any existing cage
-          const hasUsedNeighbor = possibleNeighbors.some(
-            (n) => !isCellAvailable(n.row, n.col)
-          )
-          if (hasUsedNeighbor) {
-            return { row, col }
-          }
-        }
-      }
-    }
-
-    // Finally, just return any available cell
+    // If no cells with valid neighbors found, find any available cell
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
         const row = (i + offsetRow) % 9
@@ -205,7 +211,11 @@ function generateCages(
     const cageCells = [startCell]
 
     // Try to grow the cage
-    const neighbors = getAvailableNeighbors(startCell.row, startCell.col)
+    const neighbors = getAvailableNeighbors(
+      startCell.row,
+      startCell.col,
+      cageCells
+    )
     if (neighbors.length > 0) {
       // Normal case - we can grow the cage
       const nextCell = neighbors[Math.floor(random() * neighbors.length)]
@@ -214,7 +224,7 @@ function generateCages(
 
       // Try to grow further if possible
       const targetSize = Math.min(
-        2 + Math.floor(random() * (maxCageSize - 1)), // Ensures we start from size 2
+        2 + Math.floor(random() * (maxCageSize - 1)),
         maxCageSize
       )
 
@@ -226,7 +236,7 @@ function generateCages(
         cageCells.length < maxAllowedSize
       ) {
         const allNeighbors = cageCells.flatMap((cell) =>
-          getAvailableNeighbors(cell.row, cell.col)
+          getAvailableNeighbors(cell.row, cell.col, cageCells)
         )
         if (allNeighbors.length === 0) break
 
@@ -236,7 +246,7 @@ function generateCages(
         markCellUsed(nextCell.row, nextCell.col)
       }
     } else {
-      // Special case - no available neighbors, we need to connect to an existing cage
+      // Special case - no available neighbors, try to merge with an existing cage
       const adjacentCells = [
         { row: startCell.row - 1, col: startCell.col },
         { row: startCell.row + 1, col: startCell.col },
@@ -255,7 +265,7 @@ function generateCages(
         throw new Error('Unable to create a valid cage')
       }
 
-      // Find all adjacent cages and their sizes
+      // Find all adjacent cages that won't create duplicates
       const adjacentCagesWithSizes = adjacentCells
         .map((cell) => {
           const cage = cages.find((c) =>
@@ -267,8 +277,15 @@ function generateCages(
         })
         .filter(
           (item): item is { cage: Cage; cell: CellCoord } =>
-            item.cage !== undefined
+            item.cage !== undefined &&
+            !wouldCreateDuplicates(item.cage.cells, startCell)
         )
+
+      if (adjacentCagesWithSizes.length === 0) {
+        throw new Error(
+          'Cannot merge cell with any adjacent cage without creating duplicates'
+        )
+      }
 
       // For easy mode, only allow merging with cages that won't exceed size 3
       if (difficulty === 'easy') {
@@ -276,20 +293,16 @@ function generateCages(
           ({ cage }) => cage.cells.length < 3
         )
         if (validCages.length > 0) {
-          // Randomly choose one of the valid cages to merge with
           const { cage: existingCage } =
             validCages[Math.floor(random() * validCages.length)]
           existingCage.cells.push(startCell)
           existingCage.sum += solution[startCell.row][startCell.col]
           continue
         }
-
-        // If we can't merge with any cage without exceeding size 3,
-        // we need to backtrack and try a different layout
         throw new Error('Cannot create valid cage layout for easy mode')
       }
 
-      // For medium/hard modes, randomly choose any adjacent cage
+      // For medium/hard modes, randomly choose any valid adjacent cage
       const { cage: existingCage } =
         adjacentCagesWithSizes[
           Math.floor(random() * adjacentCagesWithSizes.length)
@@ -353,12 +366,12 @@ export function generatePuzzle(
 
   // Try multiple times to generate valid cages with different offsets
   let attempts = 0
-  const MAX_ATTEMPTS = 20
+  const MAX_ATTEMPTS = 50 // Increased from 20 to give more chances to find valid cages
   let cages: Cage[] | undefined
 
   while (attempts < MAX_ATTEMPTS && !cages) {
     try {
-      // Use attempt number to offset starting position
+      // Use attempt number to offset starting position and modify the random function
       const offsetRow = attempts % 3
       const offsetCol = Math.floor(attempts / 3) % 3
       const offsetRandom = () => {
@@ -373,7 +386,7 @@ export function generatePuzzle(
       })
     } catch (e) {
       attempts++
-      console.debug('Attempt', attempts, 'failed:', e)
+      console.debug(`Attempt ${attempts}: Failed `, e)
       // Keep trying with different offsets
       continue
     }
@@ -449,7 +462,14 @@ export function validateGrid(
       const values = cage.cells.map((cell) => grid[cell.row][cell.col].value)
       const allFilled = values.every((value) => value !== undefined)
       if (!allFilled) return true // Skip incomplete cages
-      const sum = values.reduce((acc, val) => acc + (val || 0), 0)
+
+      // Check for duplicates within the cage
+      const filledValues = values.filter((v): v is number => v !== undefined)
+      const uniqueValues = new Set(filledValues)
+      if (uniqueValues.size !== filledValues.length) return false
+
+      // Check sum
+      const sum = filledValues.reduce((acc, val) => acc + val, 0)
       return sum === cage.sum
     })
   }
