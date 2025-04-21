@@ -1,6 +1,8 @@
 import { CellCoord, SumSudokuPuzzle } from '@/types/game'
 import { useMemo } from 'react'
 
+const INSET = 4
+
 type CellBorder = {
   startCoord: CellCoord
   endCoord: CellCoord
@@ -138,16 +140,24 @@ export const useCagePaths = (
         let path = ''
         switch (border.direction) {
           case 'left':
-            path = `M${startPos.left},${startPos.top} L${endPos.left},${endPos.bottom}`
+            path = `M${startPos.left + INSET},${startPos.top + INSET} L${
+              endPos.left + INSET
+            },${endPos.bottom - INSET}`
             break
           case 'right':
-            path = `M${startPos.right},${startPos.top} L${endPos.right},${endPos.bottom}`
+            path = `M${startPos.right - INSET},${startPos.top + INSET} L${
+              endPos.right - INSET
+            },${endPos.bottom - INSET}`
             break
           case 'up':
-            path = `M${startPos.left},${startPos.top} L${endPos.right},${endPos.top}`
+            path = `M${startPos.left + INSET},${startPos.top + INSET} L${
+              endPos.right - INSET
+            },${endPos.top + INSET}`
             break
           case 'down':
-            path = `M${startPos.left},${startPos.bottom} L${endPos.right},${endPos.bottom}`
+            path = `M${startPos.left + INSET},${startPos.bottom - INSET} L${
+              endPos.right - INSET
+            },${endPos.bottom - INSET}`
             break
         }
         return path
@@ -254,7 +264,11 @@ export const useCagePaths = (
             `${bottomRightCoord.row}-${bottomRightCoord.col}`
           )
           if (!topLeftPos || !bottomRightPos) return ''
-          return `M${topLeftPos.right},${topLeftPos.bottom} L${bottomRightPos.left},${topLeftPos.bottom} L${bottomRightPos.left},${bottomRightPos.top}`
+          return `M${topLeftPos.right - INSET},${topLeftPos.bottom - INSET} L${
+            bottomRightPos.left + INSET
+          },${topLeftPos.bottom - INSET} L${bottomRightPos.left + INSET},${
+            bottomRightPos.top + INSET
+          }`
         }
 
         if (direction === 'bottom-right') {
@@ -267,7 +281,11 @@ export const useCagePaths = (
             `${bottomLeftCoord.row}-${bottomLeftCoord.col}`
           )
           if (!topRightPos || !bottomLeftPos) return ''
-          return `M${topRightPos.left},${topRightPos.bottom} L${topRightPos.left},${bottomLeftPos.top} L${bottomLeftPos.right},${bottomLeftPos.top}`
+          return `M${topRightPos.left + INSET},${topRightPos.bottom - INSET} L${
+            topRightPos.left + INSET
+          },${bottomLeftPos.top + INSET} L${bottomLeftPos.right - INSET},${
+            bottomLeftPos.top + INSET
+          }`
         }
 
         if (direction === 'top-left') {
@@ -280,7 +298,11 @@ export const useCagePaths = (
             `${bottomLeftCoord.row}-${bottomLeftCoord.col}`
           )
           if (!topRightPos || !bottomLeftPos) return ''
-          return `M${topRightPos.left},${topRightPos.bottom} L${bottomLeftPos.right},${topRightPos.bottom} L${bottomLeftPos.right},${bottomLeftPos.top}`
+          return `M${topRightPos.left + INSET},${topRightPos.bottom - INSET} L${
+            bottomLeftPos.right - INSET
+          },${topRightPos.bottom - INSET} L${bottomLeftPos.right - INSET},${
+            bottomLeftPos.top + INSET
+          }`
         }
 
         if (direction === 'bottom-left') {
@@ -293,7 +315,11 @@ export const useCagePaths = (
             `${bottomRightCoord.row}-${bottomRightCoord.col}`
           )
           if (!topLeftPos || !bottomRightPos) return ''
-          return `M${topLeftPos.right},${topLeftPos.bottom} L${topLeftPos.right},${bottomRightPos.top} L${bottomRightPos.left},${bottomRightPos.top}`
+          return `M${topLeftPos.right - INSET},${topLeftPos.bottom - INSET} L${
+            topLeftPos.right - INSET
+          },${bottomRightPos.top + INSET} L${bottomRightPos.left + INSET},${
+            bottomRightPos.top + INSET
+          }`
         }
 
         // If the direction is not recognized, return an empty string.
