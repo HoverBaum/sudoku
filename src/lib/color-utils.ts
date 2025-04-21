@@ -9,7 +9,7 @@ export function getCageColor(index: number, isDark: boolean): string {
 
   if (isDark) {
     // For dark mode, use a darker, more saturated color
-    return chroma.hsl(hue, 0.4, 0.25).hex()
+    return chroma.hsl(hue, 0.4, 0.25).alpha(0.25).hex()
   }
 
   // For light mode, use a lighter, less saturated color

@@ -39,7 +39,7 @@ const SudokuSubGrid = ({
   return (
     <div
       key={`grid-${gridRow}-${gridCol}`}
-      className="grid grid-cols-3 gap-2 p-1"
+      className="grid grid-cols-3 gap-1"
       data-subgrid={`${gridRow}-${gridCol}`}
     >
       {Array(3)
@@ -181,21 +181,21 @@ export function SudokuGrid({
           {/* Vertical separators */}
           <Separator
             orientation="vertical"
-            className="absolute left-[33.33%] h-full -translate-x-1/2 z-[5]  bg-foreground w-[2px]"
+            className="absolute left-[33.33%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground w-[2px]! -ml-0.5 -mt-[2.5%]"
           />
           <Separator
             orientation="vertical"
-            className="absolute left-[66.66%] h-full -translate-x-1/2 z-[5]  bg-foreground w-[2px]"
+            className="absolute left-[66.66%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground w-[2px]! ml-0.5 -mt-[2.5%]"
           />
 
           {/* Horizontal separators */}
           <Separator
             orientation="horizontal"
-            className="absolute top-[33.33%] w-full -translate-y-1/2 z-[5]  bg-foreground h-[2px]"
+            className="absolute top-[33.33%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground h-[2px]! -mt-0.5 -ml-[2.5%]"
           />
           <Separator
             orientation="horizontal"
-            className="absolute top-[66.66%] w-full -translate-y-1/2 z-[5]  bg-foreground h-[2px]"
+            className="absolute top-[66.66%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground h-[2px]! mt-0.5 -ml-[2.5%]"
           />
 
           <svg
@@ -208,7 +208,7 @@ export function SudokuGrid({
               <g key={boundary.id}>
                 <path
                   d={boundary.paths.join(' ')}
-                  className="stroke-foreground/35 stroke-2"
+                  className="stroke-foreground/50 stroke-2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeDasharray="4 3"
