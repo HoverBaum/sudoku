@@ -1,6 +1,11 @@
 import { describe, test, expect } from 'vitest'
 import { generatePuzzle, validateGrid, createEmptyGrid } from './game-utils'
-import type { SumSudokuPuzzle, UserGrid } from '@/types/game'
+import type {
+  SumSudokuPuzzle,
+  UserGrid,
+  CellCoord,
+  Difficulty,
+} from '@/types/game'
 
 describe('generatePuzzle', () => {
   test('generates deterministic puzzles from the same seed', () => {
@@ -26,6 +31,63 @@ describe('generatePuzzle', () => {
 
     // Hard puzzles can have larger cages
     expect(hardPuzzle.cages.some((cage) => cage.cells.length > 3)).toBe(true)
+  })
+
+  test('never generates single-cell cages', () => {
+    // Test multiple difficulties and seeds
+    const difficulties: Difficulty[] = ['easy', 'medium', 'hard']
+    const seeds = ['test1', 'test2', 'test3', 'test4', 'test5']
+
+    for (const difficulty of difficulties) {
+      for (const seed of seeds) {
+        const puzzle = generatePuzzle(seed, difficulty)
+        expect(puzzle.cages.every((cage) => cage.cells.length >= 2)).toBe(
+          true,
+          `Found single-cell cage in ${difficulty} puzzle with seed ${seed}`
+        )
+      }
+    }
+  })
+
+  test('generates connected cages', () => {
+    const puzzle = generatePuzzle('test123', 'medium')
+
+    // Helper to check if cells are adjacent
+    const areAdjacent = (cell1: CellCoord, cell2: CellCoord) => {
+      const rowDiff = Math.abs(cell1.row - cell2.row)
+      const colDiff = Math.abs(cell1.col - cell2.col)
+      return (
+        (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)
+      )
+    }
+
+    // For each cage, verify that all cells are connected
+    puzzle.cages.forEach((cage) => {
+      const { cells } = cage
+      const visited = new Set<string>()
+      const toVisit = [cells[0]]
+
+      // Flood fill from first cell
+      while (toVisit.length > 0) {
+        const cell = toVisit.pop()!
+        const key = `${cell.row},${cell.col}`
+        if (!visited.has(key)) {
+          visited.add(key)
+          // Add all adjacent cells that are in the cage
+          cells
+            .filter(
+              (c) => !visited.has(`${c.row},${c.col}`) && areAdjacent(cell, c)
+            )
+            .forEach((c) => toVisit.push(c))
+        }
+      }
+
+      // All cells should have been visited
+      expect(visited.size).toBe(
+        cells.length,
+        'Found disconnected cells in cage'
+      )
+    })
   })
 })
 

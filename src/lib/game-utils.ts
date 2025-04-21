@@ -101,7 +101,8 @@ function solveSudoku(grid: number[][]): boolean {
 function generateCages(
   solution: number[][],
   random: () => number,
-  difficulty: Difficulty
+  difficulty: Difficulty,
+  offsets?: { offsetRow: number; offsetCol: number }
 ): Cage[] {
   const cellsInCages = new Set<string>()
   const cages: Cage[] = []
@@ -109,6 +110,10 @@ function generateCages(
 
   // Helper to check if a cell is available
   const isCellAvailable = (row: number, col: number) =>
+    row >= 0 &&
+    row < 9 &&
+    col >= 0 &&
+    col < 9 &&
     !cellsInCages.has(`${row},${col}`)
 
   // Helper to mark a cell as used
@@ -129,49 +134,172 @@ function generateCages(
     return neighbors
   }
 
-  // Difficulty settings
-  const maxCageSize =
-    difficulty === 'easy' ? 3 : difficulty === 'medium' ? 4 : 5
-  const minCageSize = difficulty === 'easy' ? 2 : 1
+  // Helper to find best starting point for a new cage
+  const findStartingPoint = (): CellCoord | null => {
+    const { offsetRow = 0, offsetCol = 0 } = offsets || {}
 
-  // Create cages until all cells are used
-  while (cellsInCages.size < 81) {
-    // Find first available cell
-    let startCell: CellCoord | null = null
-    for (let row = 0; row < 9 && !startCell; row++) {
-      for (let col = 0; col < 9 && !startCell; col++) {
+    // First try to find cells that have neighbors, starting from the offset position
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        const row = (i + offsetRow) % 9
+        const col = (j + offsetCol) % 9
         if (isCellAvailable(row, col)) {
-          startCell = { row, col }
+          const neighbors = getAvailableNeighbors(row, col)
+          if (neighbors.length > 0) {
+            return { row, col }
+          }
         }
       }
     }
 
-    if (!startCell) break
+    // If no cells with neighbors found, find any available cell
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        const row = (i + offsetRow) % 9
+        const col = (j + offsetCol) % 9
+        if (isCellAvailable(row, col)) {
+          // For the last few cells, we might need to connect to already used cells
+          const possibleNeighbors = [
+            { row: row - 1, col },
+            { row: row + 1, col },
+            { row, col: col - 1 },
+            { row, col: col + 1 },
+          ].filter((n) => n.row >= 0 && n.row < 9 && n.col >= 0 && n.col < 9)
 
-    // Create a new cage
-    const cageCells: CellCoord[] = [startCell]
-    markCellUsed(startCell.row, startCell.col)
-
-    // Randomly grow the cage
-    const targetSize = Math.min(
-      minCageSize + Math.floor(random() * (maxCageSize - minCageSize + 1)),
-      maxCageSize
-    )
-
-    while (cageCells.length < targetSize) {
-      // Get all available neighbors for the current cage
-      const allNeighbors = cageCells.flatMap((cell) =>
-        getAvailableNeighbors(cell.row, cell.col)
-      )
-      if (allNeighbors.length === 0) break
-
-      // Pick a random neighbor
-      const nextCell = allNeighbors[Math.floor(random() * allNeighbors.length)]
-      cageCells.push(nextCell)
-      markCellUsed(nextCell.row, nextCell.col)
+          // Check if this cell is adjacent to any existing cage
+          const hasUsedNeighbor = possibleNeighbors.some(
+            (n) => !isCellAvailable(n.row, n.col)
+          )
+          if (hasUsedNeighbor) {
+            return { row, col }
+          }
+        }
+      }
     }
 
-    // Calculate the sum based on the solution
+    // Finally, just return any available cell
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        const row = (i + offsetRow) % 9
+        const col = (j + offsetCol) % 9
+        if (isCellAvailable(row, col)) {
+          return { row, col }
+        }
+      }
+    }
+
+    return null
+  }
+
+  // Difficulty settings
+  const maxCageSize =
+    difficulty === 'easy' ? 3 : difficulty === 'medium' ? 4 : 5
+
+  // Create cages until all cells are used
+  while (cellsInCages.size < 81) {
+    const startCell = findStartingPoint()
+    if (!startCell) break
+
+    // Mark the start cell
+    markCellUsed(startCell.row, startCell.col)
+    const cageCells = [startCell]
+
+    // Try to grow the cage
+    const neighbors = getAvailableNeighbors(startCell.row, startCell.col)
+    if (neighbors.length > 0) {
+      // Normal case - we can grow the cage
+      const nextCell = neighbors[Math.floor(random() * neighbors.length)]
+      cageCells.push(nextCell)
+      markCellUsed(nextCell.row, nextCell.col)
+
+      // Try to grow further if possible
+      const targetSize = Math.min(
+        2 + Math.floor(random() * (maxCageSize - 1)), // Ensures we start from size 2
+        maxCageSize
+      )
+
+      // For easy difficulty, strictly enforce max size of 3
+      const maxAllowedSize = difficulty === 'easy' ? 3 : maxCageSize
+
+      while (
+        cageCells.length < targetSize &&
+        cageCells.length < maxAllowedSize
+      ) {
+        const allNeighbors = cageCells.flatMap((cell) =>
+          getAvailableNeighbors(cell.row, cell.col)
+        )
+        if (allNeighbors.length === 0) break
+
+        const nextCell =
+          allNeighbors[Math.floor(random() * allNeighbors.length)]
+        cageCells.push(nextCell)
+        markCellUsed(nextCell.row, nextCell.col)
+      }
+    } else {
+      // Special case - no available neighbors, we need to connect to an existing cage
+      const adjacentCells = [
+        { row: startCell.row - 1, col: startCell.col },
+        { row: startCell.row + 1, col: startCell.col },
+        { row: startCell.row, col: startCell.col - 1 },
+        { row: startCell.row, col: startCell.col + 1 },
+      ].filter(
+        (n) =>
+          n.row >= 0 &&
+          n.row < 9 &&
+          n.col >= 0 &&
+          n.col < 9 &&
+          !isCellAvailable(n.row, n.col)
+      )
+
+      if (adjacentCells.length === 0) {
+        throw new Error('Unable to create a valid cage')
+      }
+
+      // Find all adjacent cages and their sizes
+      const adjacentCagesWithSizes = adjacentCells
+        .map((cell) => {
+          const cage = cages.find((c) =>
+            c.cells.some(
+              (ccell) => ccell.row === cell.row && ccell.col === cell.col
+            )
+          )
+          return { cage, cell }
+        })
+        .filter(
+          (item): item is { cage: Cage; cell: CellCoord } =>
+            item.cage !== undefined
+        )
+
+      // For easy mode, only allow merging with cages that won't exceed size 3
+      if (difficulty === 'easy') {
+        const validCages = adjacentCagesWithSizes.filter(
+          ({ cage }) => cage.cells.length < 3
+        )
+        if (validCages.length > 0) {
+          // Randomly choose one of the valid cages to merge with
+          const { cage: existingCage } =
+            validCages[Math.floor(random() * validCages.length)]
+          existingCage.cells.push(startCell)
+          existingCage.sum += solution[startCell.row][startCell.col]
+          continue
+        }
+
+        // If we can't merge with any cage without exceeding size 3,
+        // we need to backtrack and try a different layout
+        throw new Error('Cannot create valid cage layout for easy mode')
+      }
+
+      // For medium/hard modes, randomly choose any adjacent cage
+      const { cage: existingCage } =
+        adjacentCagesWithSizes[
+          Math.floor(random() * adjacentCagesWithSizes.length)
+        ]
+      existingCage.cells.push(startCell)
+      existingCage.sum += solution[startCell.row][startCell.col]
+      continue
+    }
+
+    // Calculate sum and add the cage
     const sum = cageCells.reduce(
       (acc, cell) => acc + solution[cell.row][cell.col],
       0
@@ -222,7 +350,39 @@ export function generatePuzzle(
 ): SumSudokuPuzzle {
   const random = mulberry32(hashCode(seed))
   const solution = generateSolution(random)
-  const cages = generateCages(solution, random, difficulty)
+
+  // Try multiple times to generate valid cages with different offsets
+  let attempts = 0
+  const MAX_ATTEMPTS = 20
+  let cages: Cage[] | undefined
+
+  while (attempts < MAX_ATTEMPTS && !cages) {
+    try {
+      // Use attempt number to offset starting position
+      const offsetRow = attempts % 3
+      const offsetCol = Math.floor(attempts / 3) % 3
+      const offsetRandom = () => {
+        // Modify random value based on attempt to get different patterns
+        const r = random()
+        return (r + attempts / MAX_ATTEMPTS) % 1
+      }
+
+      cages = generateCages(solution, offsetRandom, difficulty, {
+        offsetRow,
+        offsetCol,
+      })
+    } catch (e) {
+      attempts++
+      console.error(e)
+      // Keep trying with different offsets
+      continue
+    }
+  }
+
+  if (!cages) {
+    throw new Error('Unable to generate a valid puzzle after multiple attempts')
+  }
+
   const preFilledCells = generatePreFilledCells(solution, random, difficulty)
 
   return {
@@ -267,7 +427,7 @@ export function validateGrid(
 
   const validateBoxes: ValidationRule = (grid) => {
     for (let boxRow = 0; boxRow < 9; boxRow += 3) {
-      for (let boxCol = 0; boxCol < 9; boxCol += 3) {
+      for (let boxCol = 0; boxCol < 3; boxCol += 3) {
         const seen = new Set<number>()
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {

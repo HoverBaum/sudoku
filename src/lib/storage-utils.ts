@@ -1,23 +1,52 @@
 import type { Difficulty, UserProgress } from '@/types/game'
 import { createEmptyGrid } from './game-utils'
 
-const ACTIVE_GAME_KEY = 'sudoku:activeGame'
 const DEBUG_MODE_KEY = 'sudoku:debugMode'
+const ACTIVE_GAME_KEY = 'sumSudoku:activeGame'
+
+function getProgressKey(seed: string, difficulty: Difficulty): string {
+  return `sumSudoku:progress:${seed}:${difficulty}`
+}
 
 export function saveProgress(progress: UserProgress): void {
-  localStorage.setItem(ACTIVE_GAME_KEY, JSON.stringify(progress))
+  // Save to both the specific key and active game key
+  const key = getProgressKey(progress.puzzleSeed, progress.difficulty)
+  const data = JSON.stringify(progress)
+  localStorage.setItem(key, data)
+  localStorage.setItem(ACTIVE_GAME_KEY, data)
 }
 
 export function loadProgress(): UserProgress | null {
-  const stored = localStorage.getItem(ACTIVE_GAME_KEY)
-
-  if (!stored) return null
-
-  try {
-    return JSON.parse(stored) as UserProgress
-  } catch {
-    return null
+  // First try to load the active game
+  const activeGame = localStorage.getItem(ACTIVE_GAME_KEY)
+  if (activeGame) {
+    try {
+      return JSON.parse(activeGame) as UserProgress
+    } catch {
+      // If active game is invalid, continue to search other games
+    }
   }
+
+  // Look through all localStorage keys to find any matching our format
+  let mostRecent: UserProgress | null = null
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key?.startsWith('sumSudoku:progress:')) {
+      try {
+        const stored = localStorage.getItem(key)
+        if (stored) {
+          const progress = JSON.parse(stored) as UserProgress
+          if (!mostRecent || progress.lastUpdated > mostRecent.lastUpdated) {
+            mostRecent = progress
+          }
+        }
+      } catch {
+        continue
+      }
+    }
+  }
+
+  return mostRecent
 }
 
 // For URL sharing
