@@ -373,7 +373,7 @@ export function generatePuzzle(
       })
     } catch (e) {
       attempts++
-      console.error(e)
+      console.debug('Attempt', attempts, 'failed:', e)
       // Keep trying with different offsets
       continue
     }
