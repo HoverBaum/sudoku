@@ -188,7 +188,7 @@ export function SudokuGrid({
         onNoteModeChange={setIsNoteMode}
         onCheckSolution={handleCheckSolution}
       />
-      <div className="relative w-fit" data-sudoku-grid>
+      <div className="relative w-fit mx-auto" data-sudoku-grid>
         <div
           className="relative grid grid-cols-3 gap-0"
           role="row"
@@ -198,21 +198,21 @@ export function SudokuGrid({
           {/* Vertical separators */}
           <Separator
             orientation="vertical"
-            className="absolute left-[33.33%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground/75 w-[2px]! -mt-[2.5%]"
+            className="absolute left-[33.33%] h-[105%]! -translate-x-1/2 z-[5] bg-foreground/75 w-[1px]! sm:w-[1.5px]! md:w-[2px]! -mt-[2.5%]"
           />
           <Separator
             orientation="vertical"
-            className="absolute left-[66.66%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground/75 w-[2px]! -mt-[2.5%]"
+            className="absolute left-[66.66%] h-[105%]! -translate-x-1/2 z-[5] bg-foreground/75 w-[1px]! sm:w-[1.5px]! md:w-[2px]! -mt-[2.5%]"
           />
 
           {/* Horizontal separators */}
           <Separator
             orientation="horizontal"
-            className="absolute top-[33.33%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground/75 h-[2px]! -ml-[2.5%]"
+            className="absolute top-[33.33%] w-[105%]! -translate-y-1/2 z-[5] bg-foreground/75 h-[1px]! sm:h-[1.5px]! md:h-[2px]! -ml-[2.5%]"
           />
           <Separator
             orientation="horizontal"
-            className="absolute top-[66.66%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground/75 h-[2px]! -ml-[2.5%]"
+            className="absolute top-[66.66%] w-[105%]! -translate-y-1/2 z-[5] bg-foreground/75 h-[1px]! sm:h-[1.5px]! md:h-[2px]! -ml-[2.5%]"
           />
 
           <svg
@@ -225,10 +225,10 @@ export function SudokuGrid({
               <g key={boundary.id}>
                 <path
                   d={boundary.paths.join(' ')}
-                  className="stroke-foreground/50 stroke-2"
+                  className="stroke-foreground/50 stroke-[1px] sm:stroke-[1.5px] md:stroke-2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeDasharray="4 3"
+                  strokeDasharray="3 2 sm:4 3"
                   fill="none"
                 />
               </g>
