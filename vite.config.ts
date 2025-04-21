@@ -11,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'sudoku-icon.png', 'icon.svg'],
+      includeAssets: ['favicon.ico', 'sudoku-icon.png'],
       manifest: {
         name: 'Sudoku',
         short_name: 'Sudoku',
