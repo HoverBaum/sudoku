@@ -2,6 +2,7 @@ import type { Difficulty, UserProgress } from '@/types/game'
 import { createEmptyGrid } from './game-utils'
 
 const STORAGE_PREFIX = 'sumSudoku:progress:'
+const DEBUG_MODE_KEY = 'sumSudoku:debugMode'
 
 export function saveProgress(progress: UserProgress): void {
   const key = `${STORAGE_PREFIX}${progress.puzzleSeed}:${progress.difficulty}`
@@ -64,4 +65,12 @@ export function createNewProgress(
     grid,
     lastUpdated: Date.now(),
   }
+}
+
+export function isDebugModeEnabled(): boolean {
+  return localStorage.getItem(DEBUG_MODE_KEY) === 'true'
+}
+
+export function setDebugMode(enabled: boolean): void {
+  localStorage.setItem(DEBUG_MODE_KEY, enabled.toString())
 }

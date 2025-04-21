@@ -21,12 +21,14 @@ import {
   createNewProgress,
   encodeGrid,
   decodeGrid,
+  isDebugModeEnabled,
 } from '@/lib/storage-utils'
 
 function AppContent() {
   const [puzzle, setPuzzle] = useState<SumSudokuPuzzle | null>(null)
   const [progress, setProgress] = useState<UserProgress | null>(null)
   const [isDebugMode, setIsDebugMode] = useState(false)
+  const showDebug = isDebugModeEnabled()
   const { toast } = useToast()
 
   // Load puzzle from URL parameters on initial load
@@ -148,6 +150,11 @@ function AppContent() {
     })
   }, [puzzle, progress, toast])
 
+  const handleToggleDebug = useCallback(() => {
+    const newDebugState = !isDebugMode
+    setIsDebugMode(newDebugState)
+  }, [isDebugMode])
+
   if (!puzzle || !progress) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -170,14 +177,16 @@ function AppContent() {
           <Button onClick={handleCheck}>Check Solution</Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => setIsDebugMode(!isDebugMode)}>
-            {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
-          </Button>
+          {showDebug && (
+            <Button variant="ghost" onClick={handleToggleDebug}>
+              {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
+            </Button>
+          )}
           <ModeToggle />
         </div>
       </div>
 
-      {isDebugMode && <PuzzleDebugger puzzle={puzzle} />}
+      {isDebugMode && showDebug && <PuzzleDebugger puzzle={puzzle} />}
 
       <div className="flex-1 flex flex-col items-center justify-center -mt-8">
         <SudokuGrid
