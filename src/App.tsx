@@ -51,7 +51,7 @@ function AppContent() {
       }
 
       // If no state in URL or invalid, try loading from localStorage
-      const savedProgress = loadProgress(seed, difficulty)
+      const savedProgress = loadProgress()
       if (savedProgress) {
         setProgress(savedProgress)
       } else {
@@ -67,7 +67,7 @@ function AppContent() {
       setPuzzle(newPuzzle)
 
       // Try to load existing progress
-      const savedProgress = loadProgress(seed, difficulty)
+      const savedProgress = loadProgress()
       if (savedProgress) {
         setProgress(savedProgress)
         toast({
@@ -140,7 +140,17 @@ function AppContent() {
   // Handle checking solution
   const handleCheck = useCallback(() => {
     if (!puzzle || !progress) return
+    const isGridComplete = progress.grid.every((row) =>
+      row.every((cell) => cell.value !== undefined)
+    )
 
+    if (!isGridComplete) {
+      toast({
+        title: 'Incomplete Grid',
+        description: 'Please fill out all cells before checking the solution.',
+      })
+      return
+    }
     const isValid = validateGrid(progress.grid, puzzle)
     toast({
       title: isValid ? 'Congratulations! 🎉' : 'Not quite right',
