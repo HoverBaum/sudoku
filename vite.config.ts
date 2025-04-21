@@ -11,37 +11,33 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: [
-        'favicon.ico',
-        'apple-touch-icon-180x180.png',
-        'icon.svg',
-      ],
+      includeAssets: ['favicon.ico', 'sudoku-icon.png', 'icon.svg'],
       manifest: {
-        name: 'Sum Sudoku',
-        short_name: 'Sum Sudoku',
-        description: 'A Sum Sudoku puzzle game',
+        name: 'Sudoku',
+        short_name: 'Sudoku',
+        description: 'A Killer Sudoku App',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         start_url: '/',
         display: 'standalone',
         icons: [
           {
-            src: 'pwa-64x64.png',
+            src: 'sudoku-icon.png',
             sizes: '64x64',
             type: 'image/png',
           },
           {
-            src: 'pwa-192x192.png',
+            src: 'sudoku-icon.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'sudoku-icon.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: 'maskable-icon-512x512.png',
+            src: 'sudoku-icon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
