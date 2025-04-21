@@ -228,7 +228,7 @@ export function SudokuGrid({
                   className="stroke-foreground/50 stroke-[1px] sm:stroke-[1.5px] md:stroke-2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeDasharray="3 2 sm:4 3"
+                  strokeDasharray="3 2"
                   fill="none"
                 />
               </g>
