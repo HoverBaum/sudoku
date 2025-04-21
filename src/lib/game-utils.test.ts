@@ -41,10 +41,10 @@ describe('generatePuzzle', () => {
     for (const difficulty of difficulties) {
       for (const seed of seeds) {
         const puzzle = generatePuzzle(seed, difficulty)
-        expect(puzzle.cages.every((cage) => cage.cells.length >= 2)).toBe(
-          true,
+        expect(
+          puzzle.cages.every((cage) => cage.cells.length >= 2),
           `Found single-cell cage in ${difficulty} puzzle with seed ${seed}`
-        )
+        ).toBe(true)
       }
     }
   })
@@ -83,9 +83,8 @@ describe('generatePuzzle', () => {
       }
 
       // All cells should have been visited
-      expect(visited.size).toBe(
-        cells.length,
-        'Found disconnected cells in cage'
+      expect(visited.size, 'Found disconnected cells in cage').toBe(
+        cells.length
       )
     })
   })
