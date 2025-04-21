@@ -1,6 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { act } from 'react'
 import { NumberControls } from './NumberControls'
 
 describe('NumberControls', () => {
@@ -24,7 +25,9 @@ describe('NumberControls', () => {
     const user = userEvent.setup()
     render(<NumberControls {...defaultProps} onNumberInput={onNumberInput} />)
 
-    await user.click(screen.getByRole('button', { name: 'Input number 5' }))
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: 'Input number 5' }))
+    })
     expect(onNumberInput).toHaveBeenCalledWith(5)
   })
 
@@ -35,7 +38,9 @@ describe('NumberControls', () => {
       <NumberControls {...defaultProps} onNoteModeChange={onNoteModeChange} />
     )
 
-    await user.click(screen.getByRole('radio', { name: /notes mode/i }))
+    await act(async () => {
+      await user.click(screen.getByRole('radio', { name: /notes mode/i }))
+    })
     expect(onNoteModeChange).toHaveBeenCalledWith(true)
   })
 

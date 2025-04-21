@@ -1,5 +1,6 @@
 import { describe, test, expect, vi } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
+import { act } from 'react'
 import { useSudokuControls } from './use-sudoku-controls'
 import type { UserGrid } from '@/types/game'
 
@@ -40,10 +41,12 @@ describe('useSudokuControls', () => {
       useSudokuControls(createMockGrid(), onCellUpdate)
     )
 
+    // Select the cell first
     act(() => {
       result.current.handleCellClick({ row: 1, col: 1 })
     })
 
+    // Then handle number input
     act(() => {
       result.current.handleNumberInput(5)
     })
@@ -57,14 +60,17 @@ describe('useSudokuControls', () => {
       useSudokuControls(createMockGrid(), onCellUpdate)
     )
 
+    // Select cell first
     act(() => {
       result.current.handleCellClick({ row: 1, col: 1 })
     })
 
+    // Enable notes mode
     act(() => {
       result.current.setIsNoteMode(true)
     })
 
+    // Handle number input
     act(() => {
       result.current.handleNumberInput(5)
     })
@@ -83,14 +89,17 @@ describe('useSudokuControls', () => {
       useSudokuControls(mockGrid, onCellUpdate)
     )
 
+    // Select cell first
     act(() => {
       result.current.handleCellClick({ row: 1, col: 1 })
     })
 
+    // Enable notes mode
     act(() => {
       result.current.setIsNoteMode(true)
     })
 
+    // Toggle number
     act(() => {
       result.current.handleNumberInput(5) // Should remove 5 from notes
     })
@@ -107,10 +116,12 @@ describe('useSudokuControls', () => {
       useSudokuControls(mockGrid, onCellUpdate)
     )
 
+    // Select cell first
     act(() => {
       result.current.handleCellClick({ row: 1, col: 1 })
     })
 
+    // Toggle number
     act(() => {
       result.current.handleNumberInput(5) // Should remove 5
     })
