@@ -39,7 +39,7 @@ const SudokuSubGrid = ({
   return (
     <div
       key={`grid-${gridRow}-${gridCol}`}
-      className="grid grid-cols-3 gap-1"
+      className="grid grid-cols-3"
       data-subgrid={`${gridRow}-${gridCol}`}
     >
       {Array(3)
@@ -173,7 +173,7 @@ export function SudokuGrid({
     <div className="flex flex-col gap-4">
       <div className="relative w-fit" data-sudoku-grid>
         <div
-          className="relative grid grid-cols-3 gap-2"
+          className="relative grid grid-cols-3 gap-0"
           role="row"
           aria-label="Grid cells"
           data-grid-container
@@ -181,21 +181,21 @@ export function SudokuGrid({
           {/* Vertical separators */}
           <Separator
             orientation="vertical"
-            className="absolute left-[33.33%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground w-[2px]! -ml-0.5 -mt-[2.5%]"
+            className="absolute left-[33.33%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground/75 w-[2px]! -mt-[2.5%]"
           />
           <Separator
             orientation="vertical"
-            className="absolute left-[66.66%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground w-[2px]! ml-0.5 -mt-[2.5%]"
+            className="absolute left-[66.66%] h-[105%]! -translate-x-1/2 z-[5]  bg-foreground/75 w-[2px]! -mt-[2.5%]"
           />
 
           {/* Horizontal separators */}
           <Separator
             orientation="horizontal"
-            className="absolute top-[33.33%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground h-[2px]! -mt-0.5 -ml-[2.5%]"
+            className="absolute top-[33.33%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground/75 h-[2px]! -ml-[2.5%]"
           />
           <Separator
             orientation="horizontal"
-            className="absolute top-[66.66%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground h-[2px]! mt-0.5 -ml-[2.5%]"
+            className="absolute top-[66.66%] w-[105%]! -translate-y-1/2 z-[5]  bg-foreground/75 h-[2px]! -ml-[2.5%]"
           />
 
           <svg

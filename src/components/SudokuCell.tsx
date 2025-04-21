@@ -8,12 +8,6 @@ type SudokuCellProps = {
   cage?: Cage
   isSelected: boolean
   cageColor?: string
-  borders: {
-    top: boolean
-    right: boolean
-    bottom: boolean
-    left: boolean
-  }
   showCageSum: boolean
   onClick: (coord: CellCoord) => void
   onKeyDown: (e: KeyboardEvent<HTMLDivElement>, coord: CellCoord) => void
@@ -26,7 +20,6 @@ export const SudokuCell = ({
   cage,
   isSelected,
   cageColor,
-  borders,
   showCageSum,
   onClick,
   onKeyDown,
@@ -45,16 +38,11 @@ export const SudokuCell = ({
       ref={cellRef}
       data-cell-coord={`${coord.row}-${coord.col}`}
       className={cn(
-        'w-12 h-12 flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer select-none transition-colors duration-200 rounded-none bg-background border',
+        'w-12 h-12 flex items-center justify-center relative cursor-pointer select-none transition-colors duration-200 rounded-none bg-background border',
         {
-          'border-t-2': borders.top,
-          'border-r-2': borders.right,
-          'border-b-2': borders.bottom,
-          'border-l-2': borders.left,
-          'bg-accent': isSelected,
+          'bg-foreground/15': isSelected,
         }
       )}
-      style={{ backgroundColor: cageColor }}
       role="gridcell"
       aria-label={`Cell ${coord.row + 1},${coord.col + 1}${
         cell.isPreFilled ? ' (pre-filled)' : ''
@@ -74,7 +62,7 @@ export const SudokuCell = ({
       )}
       {cell.value ? (
         <span
-          className={cn('text-3xl transition-colors duration-200', {
+          className={cn('text-2xl transition-colors duration-200', {
             'underline underline-offset-4': cell.isPreFilled,
           })}
           aria-label={`Value ${cell.value}${
