@@ -55,6 +55,7 @@ describe('validateGrid', () => {
         [6, 4, 5, 9, 7, 8, 3, 1, 2],
         [9, 7, 8, 3, 1, 2, 6, 4, 5],
       ],
+      preFilledCells: [],
     }
 
     const userGrid: UserGrid = testPuzzle.solution!.map((row) =>
@@ -89,6 +90,7 @@ describe('validateGrid', () => {
         [6, 4, 5, 9, 7, 8, 3, 1, 2],
         [9, 7, 8, 3, 1, 2, 6, 4, 5],
       ],
+      preFilledCells: [],
     }
 
     const userGrid: UserGrid = testPuzzle.solution!.map((row) =>

@@ -11,6 +11,7 @@ describe('SudokuCell', () => {
     borders: { top: true, right: true, bottom: true, left: true },
     onClick: vi.fn(),
     onKeyDown: vi.fn(),
+    showCageSum: false,
   }
 
   test('renders empty cell', () => {

@@ -1,8 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PuzzleSelector } from './PuzzleSelector'
-import { act } from 'react-dom/test-utils'
 
 describe('PuzzleSelector', () => {
   test('opens dialog on button click', async () => {

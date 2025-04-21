@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SudokuGrid } from './SudokuGrid'
 import type { SumSudokuPuzzle, UserGrid } from '@/types/game'
@@ -21,6 +21,7 @@ describe('SudokuGrid', () => {
     solution: Array(9)
       .fill(null)
       .map(() => Array(9).fill(0)),
+    preFilledCells: [],
   }
 
   const mockGrid: UserGrid = Array(9)

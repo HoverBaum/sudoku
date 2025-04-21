@@ -221,14 +221,8 @@ export function generatePuzzle(
   difficulty: Difficulty
 ): SumSudokuPuzzle {
   const random = mulberry32(hashCode(seed))
-
-  // First generate a valid solution
   const solution = generateSolution(random)
-
-  // Then create cages around it
   const cages = generateCages(solution, random, difficulty)
-
-  // Generate pre-filled cells
   const preFilledCells = generatePreFilledCells(solution, random, difficulty)
 
   return {
@@ -236,43 +230,8 @@ export function generatePuzzle(
     difficulty,
     cages,
     solution,
-    preFilledCells, // Add pre-filled cells to the puzzle
+    preFilledCells,
   }
-}
-
-// Internal helper to validate if numbers in a 3x3 box are valid (no duplicates)
-function _validateBox(
-  grid: UserGrid,
-  startRow: number,
-  startCol: number
-): boolean {
-  const seen = new Set<number>()
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      const value = grid[startRow + i][startCol + j].value
-      if (value) {
-        if (seen.has(value)) return false
-        seen.add(value)
-      }
-    }
-  }
-  return true
-}
-
-// Internal helper to validate if a cage's sum is correct
-function _validateCage(grid: UserGrid, cage: Cage): boolean {
-  let sum = 0
-  const seen = new Set<number>()
-
-  for (const { row, col } of cage.cells) {
-    const value = grid[row][col].value
-    if (!value) return false
-    if (seen.has(value)) return false
-    seen.add(value)
-    sum += value
-  }
-
-  return sum === cage.sum
 }
 
 // Validate the entire grid
