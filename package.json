@@ -1,5 +1,5 @@
 {
-  "name": "sum-sudoku",
+  "name": "@hoverbaum/sudoku",
   "private": true,
   "version": "0.0.0",
   "type": "module",
