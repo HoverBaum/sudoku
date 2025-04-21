@@ -4,7 +4,10 @@ import { useCellPositions } from '@/hooks/use-cell-positions'
 import { useDarkMode } from '@/hooks/use-dark-mode'
 import { SudokuCell } from './SudokuCell'
 import { NumberControls } from './NumberControls'
+import { PuzzleToolbar } from './PuzzleToolbar'
 import { Separator } from './ui/separator'
+import { useToast } from '@/components/ui/use-toast'
+import { validateGrid } from '@/lib/game-utils'
 import type { SumSudokuPuzzle, UserGrid, CellCoord, Cage } from '@/types/game'
 import { useCagePaths } from '@/hooks/useCagePaths'
 
@@ -87,6 +90,7 @@ export function SudokuGrid({
   onCellUpdate,
 }: SudokuGridProps) {
   const isDarkMode = useDarkMode()
+  const { toast } = useToast()
 
   const {
     isNoteMode,
@@ -110,6 +114,28 @@ export function SudokuGrid({
     },
     [memoizedPuzzle]
   )
+
+  const handleCheckSolution = useCallback(() => {
+    const isGridComplete = userGrid.every((row) =>
+      row.every((cell) => cell.value !== undefined)
+    )
+
+    if (!isGridComplete) {
+      toast({
+        title: 'Incomplete Grid',
+        description: 'Please fill out all cells before checking the solution.',
+      })
+      return
+    }
+
+    const isValid = validateGrid(userGrid, puzzle)
+    toast({
+      title: isValid ? 'Congratulations! 🎉' : 'Not quite right',
+      description: isValid
+        ? "You've solved the puzzle correctly!"
+        : 'Keep trying, there are some mistakes.',
+    })
+  }, [userGrid, puzzle, toast])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>, coord: CellCoord) => {
@@ -157,6 +183,11 @@ export function SudokuGrid({
 
   return (
     <div className="flex flex-col gap-4">
+      <PuzzleToolbar
+        isNoteMode={isNoteMode}
+        onNoteModeChange={setIsNoteMode}
+        onCheckSolution={handleCheckSolution}
+      />
       <div className="relative w-fit" data-sudoku-grid>
         <div
           className="relative grid grid-cols-3 gap-0"
@@ -229,11 +260,7 @@ export function SudokuGrid({
         </div>
       </div>
 
-      <NumberControls
-        isNoteMode={isNoteMode}
-        onNoteModeChange={setIsNoteMode}
-        onNumberInput={handleNumberInput}
-      />
+      <NumberControls onNumberInput={handleNumberInput} />
     </div>
   )
 }

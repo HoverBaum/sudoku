@@ -1,58 +1,52 @@
 import { describe, test, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { act } from 'react'
 import { NumberControls } from './NumberControls'
 
 describe('NumberControls', () => {
-  const defaultProps = {
-    isNoteMode: false,
-    onNoteModeChange: vi.fn(),
-    onNumberInput: vi.fn(),
-  }
+  test('renders number buttons 1-9', () => {
+    render(<NumberControls onNumberInput={() => {}} />)
 
-  test('renders number buttons', () => {
-    render(<NumberControls {...defaultProps} />)
-    ;[1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((num) => {
+    for (let i = 1; i <= 9; i++) {
       expect(
-        screen.getByRole('button', { name: `Input number ${num}` })
+        screen.getByRole('button', { name: `Input number ${i}` })
       ).toBeInTheDocument()
-    })
+    }
   })
 
-  test('handles number input', async () => {
+  test('calls onNumberInput when button is clicked', async () => {
     const onNumberInput = vi.fn()
     const user = userEvent.setup()
-    render(<NumberControls {...defaultProps} onNumberInput={onNumberInput} />)
 
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: 'Input number 5' }))
-    })
+    render(<NumberControls onNumberInput={onNumberInput} />)
+
+    await user.click(screen.getByRole('button', { name: 'Input number 5' }))
     expect(onNumberInput).toHaveBeenCalledWith(5)
   })
 
-  test('toggles note mode', async () => {
-    const onNoteModeChange = vi.fn()
+  test('calls onNumberInput when Enter key is pressed', async () => {
+    const onNumberInput = vi.fn()
     const user = userEvent.setup()
-    render(
-      <NumberControls {...defaultProps} onNoteModeChange={onNoteModeChange} />
-    )
 
-    await act(async () => {
-      await user.click(screen.getByRole('radio', { name: /notes mode/i }))
-    })
-    expect(onNoteModeChange).toHaveBeenCalledWith(true)
+    render(<NumberControls onNumberInput={onNumberInput} />)
+
+    const button = screen.getByRole('button', { name: 'Input number 5' })
+    button.focus()
+    await user.keyboard('{Enter}')
+
+    expect(onNumberInput).toHaveBeenCalledWith(5)
   })
 
-  test('renders correct mode state', () => {
-    render(<NumberControls {...defaultProps} isNoteMode={true} />)
-    expect(screen.getByRole('radio', { name: /notes mode/i })).toHaveAttribute(
-      'aria-checked',
-      'true'
-    )
-    expect(screen.getByRole('radio', { name: /normal mode/i })).toHaveAttribute(
-      'aria-checked',
-      'false'
-    )
+  test('calls onNumberInput when Space key is pressed', async () => {
+    const onNumberInput = vi.fn()
+    const user = userEvent.setup()
+
+    render(<NumberControls onNumberInput={onNumberInput} />)
+
+    const button = screen.getByRole('button', { name: 'Input number 5' })
+    button.focus()
+    await user.keyboard(' ')
+
+    expect(onNumberInput).toHaveBeenCalledWith(5)
   })
 })

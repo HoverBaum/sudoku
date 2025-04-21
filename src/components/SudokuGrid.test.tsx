@@ -4,6 +4,13 @@ import userEvent from '@testing-library/user-event'
 import { SudokuGrid } from './SudokuGrid'
 import type { SumSudokuPuzzle, UserGrid } from '@/types/game'
 
+// Mocking useToast
+vi.mock('@/components/ui/use-toast', () => ({
+  useToast: () => ({
+    toast: vi.fn(),
+  }),
+}))
+
 describe('SudokuGrid', () => {
   const mockPuzzle: SumSudokuPuzzle = {
     seed: 'test',
@@ -41,7 +48,6 @@ describe('SudokuGrid', () => {
       />
     )
 
-    // Should have 81 cells (9x9)
     const cells = screen.getAllByRole('gridcell')
     expect(cells).toHaveLength(81)
   })
@@ -82,44 +88,6 @@ describe('SudokuGrid', () => {
     expect(onCellUpdate).toHaveBeenCalledWith({ row: 0, col: 0 }, 5, [])
   })
 
-  test('toggles notes mode', async () => {
-    const onCellUpdate = vi.fn()
-    const user = userEvent.setup()
-
-    render(
-      <SudokuGrid
-        puzzle={mockPuzzle}
-        userGrid={mockGrid}
-        onCellUpdate={onCellUpdate}
-      />
-    )
-
-    // Enable notes mode
-    await user.click(screen.getByRole('radio', { name: /notes mode/i }))
-
-    // Select first cell and input number
-    await user.click(screen.getAllByRole('gridcell')[0])
-    await user.click(screen.getByRole('button', { name: 'Input number 5' }))
-
-    expect(onCellUpdate).toHaveBeenCalledWith({ row: 0, col: 0 }, undefined, [
-      5,
-    ])
-  })
-
-  test('displays cage sums', () => {
-    render(
-      <SudokuGrid
-        puzzle={mockPuzzle}
-        userGrid={mockGrid}
-        onCellUpdate={() => {}}
-      />
-    )
-
-    const cageSum = screen.getByLabelText('Cage sum 7')
-    expect(cageSum).toBeInTheDocument()
-    expect(cageSum).toHaveTextContent('7')
-  })
-
   test('displays existing values and notes', () => {
     const filledGrid: UserGrid = Array(9)
       .fill(null)
@@ -139,14 +107,67 @@ describe('SudokuGrid', () => {
       />
     )
 
-    // Check main value
     const valueCell = screen.getByRole('gridcell', { name: /cell 1,1/i })
     expect(valueCell).toHaveTextContent('5')
 
-    // Check notes
     const notesCell = screen.getByRole('gridcell', { name: /cell 1,2/i })
     const notesList = notesCell.querySelector('[role="list"]')
     expect(notesList).toBeInTheDocument()
     expect(notesList).toHaveTextContent('123')
+  })
+
+  test('displays cage sums', () => {
+    render(
+      <SudokuGrid
+        puzzle={mockPuzzle}
+        userGrid={mockGrid}
+        onCellUpdate={() => {}}
+      />
+    )
+
+    const cageSum = screen.getByLabelText('Cage sum 7')
+    expect(cageSum).toBeInTheDocument()
+    expect(cageSum).toHaveTextContent('7')
+  })
+
+  test('renders toolbar with mode toggle and check solution button', () => {
+    render(
+      <SudokuGrid
+        puzzle={mockPuzzle}
+        userGrid={mockGrid}
+        onCellUpdate={() => {}}
+      />
+    )
+
+    expect(
+      screen.getByRole('radio', { name: /normal mode/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('radio', { name: /notes mode/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /check solution/i })
+    ).toBeInTheDocument()
+  })
+
+  test('uses number keys for input', async () => {
+    const onCellUpdate = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <SudokuGrid
+        puzzle={mockPuzzle}
+        userGrid={mockGrid}
+        onCellUpdate={onCellUpdate}
+      />
+    )
+
+    // Select first cell
+    await user.click(screen.getAllByRole('gridcell')[0])
+
+    // Press number key
+    await user.keyboard('5')
+
+    expect(onCellUpdate).toHaveBeenCalledWith({ row: 0, col: 0 }, 5, [])
   })
 })

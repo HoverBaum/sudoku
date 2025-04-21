@@ -15,7 +15,6 @@ import type {
   UserProgress,
 } from '@/types/game'
 import { generatePuzzle } from '@/lib/game-utils'
-import { validateGrid } from '@/lib/game-utils'
 import {
   loadProgress,
   saveProgress,
@@ -128,29 +127,6 @@ function AppContent() {
     })
   }, [puzzle, progress, toast])
 
-  // Handle checking solution
-  const handleCheck = useCallback(() => {
-    if (!puzzle || !progress) return
-    const isGridComplete = progress.grid.every((row) =>
-      row.every((cell) => cell.value !== undefined)
-    )
-
-    if (!isGridComplete) {
-      toast({
-        title: 'Incomplete Grid',
-        description: 'Please fill out all cells before checking the solution.',
-      })
-      return
-    }
-    const isValid = validateGrid(progress.grid, puzzle)
-    toast({
-      title: isValid ? 'Congratulations! 🎉' : 'Not quite right',
-      description: isValid
-        ? "You've solved the puzzle correctly!"
-        : 'Keep trying, there are some mistakes.',
-    })
-  }, [puzzle, progress, toast])
-
   const handleToggleDebug = useCallback(() => {
     const newDebugState = !isDebugMode
     setIsDebugMode(newDebugState)
@@ -176,7 +152,6 @@ function AppContent() {
           <Button variant="outline" onClick={handleShare}>
             Share Puzzle
           </Button>
-          <Button onClick={handleCheck}>Check Solution</Button>
         </div>
         <div className="flex items-center gap-2">
           {showDebug && (
