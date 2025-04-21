@@ -63,6 +63,11 @@ export function decodeGrid(encoded: string): UserProgress | null {
   }
 }
 
+// Clear active game progress
+export function clearActiveGame(): void {
+  localStorage.removeItem(ACTIVE_GAME_KEY)
+}
+
 export function createNewProgress(
   seed: string,
   difficulty: Difficulty,
@@ -70,6 +75,9 @@ export function createNewProgress(
     preFilledCells: { row: number; col: number; value: number }[]
   }
 ): UserProgress {
+  // Clear any existing active game first
+  clearActiveGame()
+
   const grid = createEmptyGrid()
 
   // Initialize pre-filled cells if provided
@@ -83,12 +91,17 @@ export function createNewProgress(
     }
   }
 
-  return {
+  const progress = {
     puzzleSeed: seed,
     difficulty,
     grid,
     lastUpdated: Date.now(),
   }
+
+  // Save the new progress immediately
+  saveProgress(progress)
+
+  return progress
 }
 
 export function isDebugModeEnabled(): boolean {

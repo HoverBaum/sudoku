@@ -66,18 +66,8 @@ function AppContent() {
       const newPuzzle = generatePuzzle(seed, difficulty)
       setPuzzle(newPuzzle)
 
-      // Try to load existing progress
-      const savedProgress = loadProgress()
-      if (savedProgress) {
-        setProgress(savedProgress)
-        toast({
-          title: 'Progress Restored',
-          description:
-            'Your previous progress on this puzzle has been restored.',
-        })
-      } else {
-        setProgress(createNewProgress(seed, difficulty, newPuzzle))
-      }
+      // Create fresh progress for the new puzzle
+      setProgress(createNewProgress(seed, difficulty, newPuzzle))
 
       // Update URL
       const params = new URLSearchParams()
@@ -85,7 +75,7 @@ function AppContent() {
       params.set('difficulty', difficulty)
       window.history.pushState({}, '', `?${params.toString()}`)
     },
-    [toast]
+    []
   )
 
   // Handle cell updates
