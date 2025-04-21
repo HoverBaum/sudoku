@@ -19,7 +19,6 @@ export const SudokuCell = ({
   coord,
   cage,
   isSelected,
-  cageColor,
   showCageSum,
   onClick,
   onKeyDown,

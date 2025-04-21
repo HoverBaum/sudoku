@@ -1,5 +1,4 @@
 import { useCallback, KeyboardEvent, useMemo } from 'react'
-import { getCageColor } from '@/lib/color-utils'
 import { useSudokuControls } from '@/hooks/use-sudoku-controls'
 import { useCellPositions } from '@/hooks/use-cell-positions'
 import { useDarkMode } from '@/hooks/use-dark-mode'
@@ -28,9 +27,7 @@ const SudokuSubGrid = ({
   gridRow,
   gridCol,
   userGrid,
-  puzzle,
   selectedCell,
-  isDarkMode,
   getCage,
   handleCellClick,
   handleKeyDown,
@@ -63,17 +60,6 @@ const SudokuSubGrid = ({
                     coord={{ row, col }}
                     cage={cage}
                     isSelected={isSelected}
-                    cageColor={
-                      cage
-                        ? getCageColor(puzzle.cages.indexOf(cage), isDarkMode)
-                        : undefined
-                    }
-                    borders={{
-                      top: false,
-                      right: false,
-                      bottom: false,
-                      left: false,
-                    }}
                     showCageSum={
                       cage?.cells[0].row === row && cage?.cells[0].col === col
                     }
