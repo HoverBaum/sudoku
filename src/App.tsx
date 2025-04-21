@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { PuzzleDebugger } from '@/components/PuzzleDebugger'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/mode-toggle'
+import { InstallPWA } from '@/components/install-pwa'
 import type {
   CellCoord,
   Difficulty,
@@ -158,7 +159,8 @@ function AppContent() {
   if (!puzzle || !progress) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <InstallPWA />
           <ModeToggle />
         </div>
         <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
@@ -182,6 +184,7 @@ function AppContent() {
               {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
             </Button>
           )}
+          <InstallPWA />
           <ModeToggle />
         </div>
       </div>
