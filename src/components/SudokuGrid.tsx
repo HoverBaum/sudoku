@@ -188,9 +188,12 @@ export function SudokuGrid({
         onNoteModeChange={setIsNoteMode}
         onCheckSolution={handleCheckSolution}
       />
-      <div className="relative w-fit mx-auto" data-sudoku-grid>
+      <div
+        className="relative w-full max-w-[min(calc(100vw-2rem),500px)] mx-auto px-2 sm:px-4"
+        data-sudoku-grid
+      >
         <div
-          className="relative grid grid-cols-3 gap-0"
+          className="relative grid grid-cols-3 gap-0 aspect-square"
           role="row"
           aria-label="Grid cells"
           data-grid-container

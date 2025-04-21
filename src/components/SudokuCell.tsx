@@ -37,7 +37,7 @@ export const SudokuCell = ({
       ref={cellRef}
       data-cell-coord={`${coord.row}-${coord.col}`}
       className={cn(
-        'w-8 h-8 sm:size-11 md:size-12 flex items-center justify-center relative cursor-pointer select-none transition-colors duration-200 rounded-none bg-background border',
+        'aspect-square w-full flex items-center justify-center relative cursor-pointer select-none transition-colors duration-200 rounded-none bg-background border',
         {
           'bg-foreground/15': isSelected,
         }
@@ -53,7 +53,7 @@ export const SudokuCell = ({
     >
       {showCageSum && cage && (
         <span
-          className="absolute top-0.5 left-1 text-xs sm:text-sm text-muted-foreground"
+          className="absolute top-[5%] left-[10%] text-[min(2vw,0.75rem)] text-muted-foreground"
           aria-label={`Cage sum ${cage.sum}`}
         >
           {cage.sum}
@@ -62,10 +62,7 @@ export const SudokuCell = ({
       {cell.value ? (
         <span
           className={cn(
-            'text-lg sm:text-xl md:text-2xl transition-colors duration-200',
-            {
-              'underline underline-offset-4': cell.isPreFilled,
-            }
+            'text-[min(6vw,1.75rem)] transition-colors duration-200'
           )}
           aria-label={`Value ${cell.value}${
             cell.isPreFilled ? ' (pre-filled)' : ''
@@ -75,7 +72,7 @@ export const SudokuCell = ({
         </span>
       ) : (cell.notes || []).length > 0 ? (
         <div
-          className="grid grid-cols-3 text-xs sm:text-sm text-muted-foreground"
+          className="grid grid-cols-3 w-full h-full text-[min(2vw,0.7rem)] text-muted-foreground p-[5%]"
           role="list"
           aria-label="Notes"
         >
