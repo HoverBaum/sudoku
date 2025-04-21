@@ -72,7 +72,7 @@ export const SudokuCell = ({
         </span>
       ) : (cell.notes || []).length > 0 ? (
         <div
-          className="grid grid-cols-3 gap-0.5 p-1.5 text-sm text-muted-foreground"
+          className="grid grid-cols-3 text-sm text-muted-foreground"
           role="list"
           aria-label="Notes"
         >
@@ -80,7 +80,7 @@ export const SudokuCell = ({
             <div
               key={n}
               role="listitem"
-              className={cn('flex items-center justify-center', {
+              className={cn('flex items-center justify-center leading-none', {
                 invisible: !(cell.notes || []).includes(n),
               })}
             >
