@@ -15,10 +15,21 @@ declare module 'virtual:pwa-register' {
     onNeedRefresh?: () => void
     onOfflineReady?: () => void
     onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void
-    onRegisterError?: (error: any) => void
+    onRegisterError?: (error: Error) => void
   }
 
   export function registerSW(
     options?: RegisterSWOptions
   ): (reloadPage?: boolean) => Promise<void>
+}
+
+declare module '*.json' {
+  const pkg: {
+    name: string
+    version: string
+    private: boolean
+    // Add other fields as needed
+    [key: string]: unknown
+  }
+  export default pkg
 }
