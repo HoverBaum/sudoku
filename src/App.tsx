@@ -46,13 +46,28 @@ function AppContent() {
   const showDebug = isDebugModeEnabled()
   const { toast } = useToast()
 
-  // Load puzzle from URL parameters on initial load
+  // Load puzzle from URL parameters or localStorage on initial load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const seed = params.get('seed')
     const difficulty = params.get('difficulty') as Difficulty
     const state = params.get('state')
 
+    // First try to load saved progress from localStorage
+    const savedProgress = loadProgress()
+
+    if (savedProgress) {
+      // If we have saved progress, load its corresponding puzzle
+      const savedPuzzle = generatePuzzle(
+        savedProgress.puzzleSeed,
+        savedProgress.difficulty
+      )
+      setPuzzle(savedPuzzle)
+      setProgress(savedProgress)
+      return
+    }
+
+    // If no saved progress, then handle URL parameters
     if (seed && difficulty) {
       const newPuzzle = generatePuzzle(seed, difficulty)
       setPuzzle(newPuzzle)
@@ -65,13 +80,8 @@ function AppContent() {
         }
       }
 
-      // If no state in URL or invalid, try loading from localStorage
-      const savedProgress = loadProgress()
-      if (savedProgress) {
-        setProgress(savedProgress)
-      } else {
-        setProgress(createNewProgress(seed, difficulty, newPuzzle))
-      }
+      // Create new progress if we have puzzle parameters but no state
+      setProgress(createNewProgress(seed, difficulty, newPuzzle))
     }
   }, [])
 
