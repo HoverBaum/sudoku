@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { validateGrid } from '@/lib/game-utils'
 import type { SumSudokuPuzzle, UserGrid, CellCoord, Cage } from '@/types/game'
 import { useCagePaths } from '@/hooks/useCagePaths'
+import { useCagePath } from '@/hooks/useCagePath'
 
 type SudokuSubGridProps = {
   gridRow: number
@@ -102,7 +103,8 @@ export function SudokuGrid({
   } = useSudokuControls(userGrid, onCellUpdate)
 
   const { positions, registerCell } = useCellPositions()
-  const cageBoundaries = useCagePaths(puzzle, positions)
+  // const cageBoundaries = useCagePaths(puzzle, positions)
+  const cageBoundaries = useCagePath(puzzle, positions)
 
   const memoizedPuzzle = useMemo(() => puzzle, [puzzle])
 
