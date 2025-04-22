@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useSidebar } from '@/components/ui/sidebar'
 import type { Difficulty } from '@/types/game'
 
 type PuzzleSelectorProps = {
@@ -64,6 +65,7 @@ function PuzzleContent({
             placeholder="Enter seed or generate random"
             disabled={isLoading}
             aria-label="Puzzle seed"
+            autoComplete="off"
           />
           <Button
             type="button"
@@ -108,6 +110,7 @@ export function PuzzleSelector({ onPuzzleSelect }: PuzzleSelectorProps) {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [isLoading, setIsLoading] = useState(false)
   const isMobile = useIsMobile()
+  const { setOpenMobile, setOpen } = useSidebar()
 
   const generateRandomSeed = () => {
     const randomSeed = Math.random().toString(36).substring(2, 8)
@@ -122,6 +125,8 @@ export function PuzzleSelector({ onPuzzleSelect }: PuzzleSelectorProps) {
       const finalSeed = seed || Math.random().toString(36).substring(2, 8)
       await onPuzzleSelect(finalSeed, difficulty)
       setIsOpen(false)
+      setOpen(false) // Close the desktop sidebar
+      setOpenMobile(false) // Close the mobile sidebar
     } finally {
       setIsLoading(false)
     }
