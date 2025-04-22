@@ -121,13 +121,37 @@ const innerCornerPoint = (
   currentBorder: CellBorder,
   nextBorder: CellBorder
 ): Point | undefined => {
-  if (currentBorder.direction === 'up' && nextBorder.direction === 'left') {
-    const currentPos = cellPositions.get(cellCoordToId(currentBorder.coord))
-    const nextPos = cellPositions.get(cellCoordToId(nextBorder.coord))
-    if (currentPos && nextPos) {
+  const currentPos = cellPositions.get(cellCoordToId(currentBorder.coord))
+  const nextPos = cellPositions.get(cellCoordToId(nextBorder.coord))
+  if (currentPos && nextPos) {
+    if (currentBorder.direction === 'up' && nextBorder.direction === 'left') {
       return {
-        x: currentPos.top + INSET,
-        y: nextPos.left + INSET,
+        x: nextPos.left + INSET,
+        y: currentPos.top + INSET,
+      }
+    }
+
+    if (currentBorder.direction === 'right' && nextBorder.direction === 'up') {
+      return {
+        x: currentPos.right - INSET,
+        y: nextPos.top + INSET,
+      }
+    }
+
+    if (
+      currentBorder.direction === 'down' &&
+      nextBorder.direction === 'right'
+    ) {
+      return {
+        x: nextPos.right - INSET,
+        y: currentPos.bottom - INSET,
+      }
+    }
+
+    if (currentBorder.direction === 'left' && nextBorder.direction === 'down') {
+      return {
+        x: currentPos.left + INSET,
+        y: nextPos.bottom - INSET,
       }
     }
   }
@@ -273,11 +297,16 @@ export const useCagePath = (
       const { cells } = cage
       let cellBorders: CellBorder[] = findCellBorders(cells)
       cellBorders.sort((a, b) => sortCornerCells(a.coord, b.coord))
+      // .sort((a) => {
+      //   if (a.direction === 'up') return -1
+      //   return 1
+      // })
 
       /**
        * We move clockwise from the top left most corner (thanks sorting) around the entire cage.
        */
       let currentCellBorder: CellBorder | undefined = cellBorders[0]
+      const initialCellBorder = currentCellBorder
 
       const points: Point[] = []
       if (currentCellBorder) {
@@ -292,10 +321,6 @@ export const useCagePath = (
         cellBorders = cellBorders.filter(
           (border) => border !== currentCellBorder
         )
-        console.log(
-          `Cage: ${cage.id}, Border: ${JSON.stringify(currentCellBorder)}`
-        )
-        console.log(cellBorders)
         let corner: CornerIdentifier | undefined
         if (currentCellBorder.direction === 'up') {
           corner = 'top-right'
@@ -322,15 +347,14 @@ export const useCagePath = (
         const nextCellBorder = nextCellClockwise(currentCellBorder, cellBorders)
 
         // Elongate current line if this is an internal corner.
-        if (nextCellBorder) {
-          const cornerPoint = innerCornerPoint(
-            cellPositions,
-            currentCellBorder,
-            nextCellBorder as CellBorder
-          )
-          if (cornerPoint) {
-            // points.push(cornerPoint)
-          }
+        const cornerPoint = innerCornerPoint(
+          cellPositions,
+          currentCellBorder,
+          // Because we move around and have forgotten the fir border, we manually add it here.
+          nextCellBorder || initialCellBorder
+        )
+        if (cornerPoint) {
+          points.push(cornerPoint)
         }
 
         currentCellBorder = nextCellBorder
