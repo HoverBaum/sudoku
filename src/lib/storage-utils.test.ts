@@ -91,8 +91,7 @@ describe('storage utilities', () => {
 
     saveProgress(progress)
 
-    // Check that localStorage was called with the correct key format
-    const key = `sumSudoku:progress:${progress.puzzleSeed}:${progress.difficulty}`
-    expect(localStorageMock.getItem(key)).not.toBeNull()
+    // Check that localStorage was called with the active game key
+    expect(localStorageMock.getItem('sudoku:activeGame')).not.toBeNull()
   })
 })
