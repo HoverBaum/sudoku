@@ -193,7 +193,7 @@ export function SudokuGrid({
         data-sudoku-grid
       >
         <div
-          className="relative grid grid-cols-3 gap-0 aspect-square"
+          className="relative grid grid-cols-3 gap-0 aspect-square w-[clamp(20rem,70vw,500px)]"
           role="row"
           aria-label="Grid cells"
           data-grid-container

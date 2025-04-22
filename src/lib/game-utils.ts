@@ -334,6 +334,9 @@ function generatePreFilledCells(
   random: () => number,
   difficulty: Difficulty
 ): { row: number; col: number; value: number }[] {
+  // Return empty array for hardcore mode - no pre-filled cells
+  if (difficulty === 'hardcore') return []
+
   const cells: { row: number; col: number; value: number }[] = []
   // Number of cells to reveal based on difficulty
   const numCells =

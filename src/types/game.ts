@@ -15,7 +15,7 @@ export type PreFilledCell = {
   value: number
 }
 
-export type Difficulty = 'easy' | 'medium' | 'hard'
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'hardcore'
 
 export type SumSudokuPuzzle = {
   seed: string
