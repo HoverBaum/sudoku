@@ -201,7 +201,11 @@ function AppContent() {
               )}
             </div>
 
-            {isDebugMode && showDebug && <PuzzleDebugger puzzle={puzzle} />}
+            {isDebugMode && showDebug && (
+              <div className="grid place-items-center py-12">
+                <PuzzleDebugger puzzle={puzzle} />
+              </div>
+            )}
 
             <div className="flex-1 grid place-items-center">
               <SudokuGrid
