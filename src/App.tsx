@@ -16,6 +16,11 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarTrigger,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import type {
   CellCoord,
@@ -32,6 +37,7 @@ import {
   decodeGrid,
   isDebugModeEnabled,
 } from '@/lib/storage-utils'
+import { Separator } from './components/ui/separator'
 
 function AppContent() {
   const [puzzle, setPuzzle] = useState<SumSudokuPuzzle | null>(null)
@@ -162,6 +168,18 @@ function AppContent() {
             </div>
           </SidebarContent>
           <SidebarFooter className="px-4">
+            <Separator />
+            <SidebarGroup>
+              <SidebarGroupLabel className="pl-0">Game Info</SidebarGroupLabel>
+              <SidebarGroupContent className="text-muted-foreground">
+                <SidebarMenu>
+                  <SidebarMenuItem>Seed: {puzzle?.seed}</SidebarMenuItem>
+                  <SidebarMenuItem>
+                    Difficulty: {puzzle?.difficulty}
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
             <div className="flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 Version {pkg.version}
