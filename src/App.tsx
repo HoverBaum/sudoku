@@ -176,7 +176,7 @@ function AppContent() {
 
         {!puzzle || !progress ? (
           <main className="flex-1 flex items-center justify-center relative">
-            <div className="absolute top-4 left-4">
+            <div className="absolute top-4 left-4 z-50">
               <SidebarTrigger />
             </div>
             <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -188,7 +188,7 @@ function AppContent() {
           </main>
         ) : (
           <main className="flex-1 flex flex-col relative">
-            <div className="p-4 flex items-center">
+            <div className="p-4 flex items-center z-50 absolute top-0 left-0">
               <SidebarTrigger />
               {showDebug && (
                 <Button
@@ -203,7 +203,7 @@ function AppContent() {
 
             {isDebugMode && showDebug && <PuzzleDebugger puzzle={puzzle} />}
 
-            <div className="flex-1 flex flex-col items-center justify-center -mt-8">
+            <div className="flex-1 grid place-items-center">
               <SudokuGrid
                 puzzle={puzzle}
                 userGrid={progress.grid}
