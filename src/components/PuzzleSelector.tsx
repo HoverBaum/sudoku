@@ -50,7 +50,9 @@ export function PuzzleSelector({ onPuzzleSelect }: PuzzleSelectorProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">New Puzzle</Button>
+        <Button variant="outline" className="w-full">
+          New Puzzle
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

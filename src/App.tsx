@@ -141,42 +141,9 @@ function AppContent() {
     setIsDebugMode(newDebugState)
   }, [isDebugMode])
 
-  if (!puzzle || !progress) {
-    return (
-      <div className="min-h-screen flex bg-background">
-        <SidebarProvider defaultOpen={false}>
-          <Sidebar>
-            <SidebarHeader>
-              <h2 className="text-lg font-semibold px-4">Sudoku</h2>
-            </SidebarHeader>
-            <SidebarContent>
-              <div className="px-4 py-2">
-                <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
-              </div>
-            </SidebarContent>
-            <SidebarFooter className="px-4">
-              <p className="text-xs text-muted-foreground">
-                Version {pkg.version}
-              </p>
-            </SidebarFooter>
-          </Sidebar>
-          <main className="flex-1 flex items-center justify-center">
-            <div className="absolute top-4 left-4">
-              <SidebarTrigger />
-            </div>
-            <div className="absolute top-4 right-4 flex items-center gap-2">
-              <InstallPWA />
-              <ModeToggle />
-            </div>
-          </main>
-        </SidebarProvider>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen flex bg-background">
-      <SidebarProvider defaultOpen>
+      <SidebarProvider defaultOpen={false}>
         <Sidebar>
           <SidebarHeader>
             <h2 className="text-lg font-semibold px-4">Sum Sudoku</h2>
@@ -188,6 +155,7 @@ function AppContent() {
                 variant="outline"
                 onClick={handleShare}
                 className="w-full"
+                disabled={!progress || !puzzle}
               >
                 Share Puzzle
               </Button>
@@ -206,30 +174,44 @@ function AppContent() {
           </SidebarFooter>
         </Sidebar>
 
-        <main className="flex-1 flex flex-col">
-          <div className="p-4 flex items-center">
-            <SidebarTrigger />
-            {showDebug && (
-              <Button
-                variant="ghost"
-                onClick={handleToggleDebug}
-                className="ml-4"
-              >
-                {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
-              </Button>
-            )}
-          </div>
+        {!puzzle || !progress ? (
+          <main className="flex-1 flex items-center justify-center relative">
+            <div className="absolute top-4 left-4">
+              <SidebarTrigger />
+            </div>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <InstallPWA />
+            </div>
+            <div className="w-fit">
+              <PuzzleSelector onPuzzleSelect={handlePuzzleSelect} />
+            </div>
+          </main>
+        ) : (
+          <main className="flex-1 flex flex-col relative">
+            <div className="p-4 flex items-center">
+              <SidebarTrigger />
+              {showDebug && (
+                <Button
+                  variant="ghost"
+                  onClick={handleToggleDebug}
+                  className="ml-4"
+                >
+                  {isDebugMode ? 'Hide Debug' : 'Debug Mode'}
+                </Button>
+              )}
+            </div>
 
-          {isDebugMode && showDebug && <PuzzleDebugger puzzle={puzzle} />}
+            {isDebugMode && showDebug && <PuzzleDebugger puzzle={puzzle} />}
 
-          <div className="flex-1 flex flex-col items-center justify-center -mt-8">
-            <SudokuGrid
-              puzzle={puzzle}
-              userGrid={progress.grid}
-              onCellUpdate={handleCellUpdate}
-            />
-          </div>
-        </main>
+            <div className="flex-1 flex flex-col items-center justify-center -mt-8">
+              <SudokuGrid
+                puzzle={puzzle}
+                userGrid={progress.grid}
+                onCellUpdate={handleCellUpdate}
+              />
+            </div>
+          </main>
+        )}
 
         <Toaster />
       </SidebarProvider>
