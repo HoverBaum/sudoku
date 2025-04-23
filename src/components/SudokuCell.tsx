@@ -55,7 +55,7 @@ export const SudokuCell = ({
       <span className="absolute top-4 left-1">c {coord.col}</span> */}
       {showCageSum && cage && (
         <span
-          className="absolute top-[5%] left-[10%] text-[min(2vw,0.75rem)] text-muted-foreground"
+          className="absolute top-[1px] left-[1px] pr-[2px] pl-[1px] text-[min(2vw,0.75rem)] text-muted-foreground bg-background z-50"
           aria-label={`Cage sum ${cage.sum}`}
         >
           {cage.sum}
