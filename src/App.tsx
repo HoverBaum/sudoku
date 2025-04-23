@@ -114,15 +114,80 @@ function AppContent() {
       // Prevent modifying pre-filled cells
       if (currentCell.isPreFilled) return
 
+      const newGrid = [...progress.grid]
+
+      // If a value is being placed (not just notes), remove that number from notes in affected cells
+      if (value !== undefined) {
+        // Remove from same row
+        for (let col = 0; col < 9; col++) {
+          if (col !== coord.col && newGrid[coord.row][col].notes) {
+            newGrid[coord.row][col].notes = newGrid[coord.row][
+              col
+            ].notes?.filter((n) => n !== value)
+          }
+        }
+
+        // Remove from same column
+        for (let row = 0; row < 9; row++) {
+          if (row !== coord.row && newGrid[row][coord.col].notes) {
+            newGrid[row][coord.col].notes = newGrid[row][
+              coord.col
+            ].notes?.filter((n) => n !== value)
+          }
+        }
+
+        // Remove from same 3x3 box
+        const boxRow = Math.floor(coord.row / 3) * 3
+        const boxCol = Math.floor(coord.col / 3) * 3
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            const row = boxRow + i
+            const col = boxCol + j
+            if (
+              (row !== coord.row || col !== coord.col) &&
+              newGrid[row][col].notes
+            ) {
+              newGrid[row][col].notes = newGrid[row][col].notes?.filter(
+                (n) => n !== value
+              )
+            }
+          }
+        }
+
+        // Remove from same cage
+        const cage = puzzle.cages.find((cage) =>
+          cage.cells.some(
+            (cell) => cell.row === coord.row && cell.col === coord.col
+          )
+        )
+        if (cage) {
+          // Calculate remaining space in cage
+          const cageValues = cage.cells.reduce((acc, cell) => {
+            const cellValue = newGrid[cell.row][cell.col].value
+            return cellValue ? acc + cellValue : acc
+          }, 0)
+          const remainingSum = cage.sum - cageValues
+
+          // Remove notes that would exceed the remaining sum
+          cage.cells.forEach((cell) => {
+            if (
+              (cell.row !== coord.row || cell.col !== coord.col) &&
+              newGrid[cell.row][cell.col].notes
+            ) {
+              newGrid[cell.row][cell.col].notes = newGrid[cell.row][
+                cell.col
+              ].notes?.filter((n) => n <= remainingSum)
+            }
+          })
+        }
+      }
+
+      // Update the target cell with new value/notes
+      newGrid[coord.row][coord.col] = { value, notes: notes || [] }
+
       const newProgress: UserProgress = {
         ...progress,
-        grid: progress.grid.map((row, r) =>
-          row.map((cell, c) =>
-            r === coord.row && c === coord.col
-              ? { value, notes: notes || [] }
-              : cell
-          )
-        ),
+        grid: newGrid,
         lastUpdated: Date.now(),
       }
 
