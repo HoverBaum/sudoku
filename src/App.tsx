@@ -103,6 +103,24 @@ function AppContent() {
     []
   )
 
+  // Handle resetting the current puzzle
+  const handleReset = useCallback(() => {
+    if (!puzzle) return
+
+    // Create fresh progress for the current puzzle without changing the seed or difficulty
+    const newProgress = createNewProgress(
+      puzzle.seed,
+      puzzle.difficulty,
+      puzzle
+    )
+    setProgress(newProgress)
+
+    toast({
+      title: 'Puzzle Reset',
+      description: 'The puzzle has been reset to its initial state.',
+    })
+  }, [puzzle, toast])
+
   // Handle cell updates
   const handleCellUpdate = useCallback(
     (coord: CellCoord, value?: number, notes?: number[]) => {
@@ -239,6 +257,14 @@ function AppContent() {
                 disabled={!progress || !puzzle}
               >
                 Share Puzzle
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                className="w-full"
+                disabled={!progress || !puzzle}
+              >
+                Reset Puzzle
               </Button>
             </div>
           </SidebarContent>
