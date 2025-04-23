@@ -9,7 +9,6 @@ import { Separator } from './ui/separator'
 import { useToast } from '@/components/ui/use-toast'
 import { validateGrid } from '@/lib/game-utils'
 import type { SumSudokuPuzzle, UserGrid, CellCoord, Cage } from '@/types/game'
-import { useCagePaths } from '@/hooks/useCagePaths'
 import { useCagePath } from '@/hooks/useCagePath'
 
 type SudokuSubGridProps = {
@@ -265,7 +264,7 @@ export function SudokuGrid({
         </div>
       </div>
 
-      <NumberControls onNumberInput={handleNumberInput} />
+      <NumberControls onNumberInput={handleNumberInput} userGrid={userGrid} />
     </div>
   )
 }
