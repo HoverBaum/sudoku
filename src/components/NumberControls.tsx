@@ -23,7 +23,7 @@ export function NumberControls({
 
   return (
     <div
-      className="grid grid-cols-9 gap-1"
+      className="grid grid-cols-5 gap-4 mt-4"
       role="toolbar"
       aria-label="Number input"
     >
